@@ -8,6 +8,9 @@
  * Any symbols defined in the Linker Script are automatically global and
  * available to the rest of the program.
  * 
+ * This script is missing the MEMORY section with the sizes of RAM and ROM. 
+ * Take a look at stm32f4xx_g.ld and stm32f4xx_e.ld for the MEMROY section. 
+ * 
  * Example for STM32F205:
  * 
  *                          MEMORY MAP (RAM)
