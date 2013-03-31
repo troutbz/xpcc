@@ -378,4 +378,13 @@ devices = \
 		"linkerscript": "cortex_m3/stm32/linker/stm32f4xx_g.ld",
 		"size": { "flash": 1048576, "ram": 114688 },
 	},
+	
+	# -------------------------------------------------------------------------
+	# Texas Instruments Stellaris Series
+	"lm4f120h5qr":
+	{
+		"defines": ["__LM4F120__", "__ARM_LM4F__", "LM4F120"],
+		"linkerscript": "cortex_m3/lm4f/linker/lm4f120h5qr.ld",
+		"size": { "flash": 262144, "ram": 32768},
+	}
 }
