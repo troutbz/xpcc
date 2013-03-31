@@ -82,6 +82,10 @@ if env['ARCHITECTURE'].startswith('cortex-m3/lpc17'):
     sourcePath += ['lpc17xx/cmsis']
     globalIncludes += []
 
+# Add the Texas Instruments Stellarisware
+if env['ARCHITECTURE'].startswith('cortex-m4/lm4f'):
+	globalIncludes += ['lm4f']
+
 # Add portions of the Atmel ASF
 if env['ARCHITECTURE'].startswith('avr32'):
 	sourcePath += [
