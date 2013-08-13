@@ -52,9 +52,8 @@ initSpi()
 extern "C" void
 SPI1_IRQHandler() {
 	LedBlue::toggle();
-	//uart::write('Y');
 
-	data = SPI1->DR;
+	data = SpiSlave1::read(); //SPI1->DR;
 	uart::write((uint8_t)(data >> 8));
 	uart::write((uint8_t)data);
 }

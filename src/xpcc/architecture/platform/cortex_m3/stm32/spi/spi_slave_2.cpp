@@ -36,6 +36,10 @@
 #include "../gpio.hpp"
 #include "spi_slave_2.hpp"
 
+#ifndef SPI_CR2_FRF
+#define SPI_CR2_FRF               ((uint16_t)0x0010)
+#endif
+
 namespace
 {
 	GPIO__INPUT(NssB12, B, 12);
@@ -43,22 +47,10 @@ namespace
 	GPIO__INPUT(MisoB14, B, 14);
 	GPIO__OUTPUT(MosiB15, B, 15);
 	
-//	static uint8_t* transmitBuffer(0);
-//	static uint8_t* receiveBuffer(0);
-//	static uint16_t bufferLength(0);
-//	enum
-//	{
-//		BUFFER_TRANSMIT_INCR_bm = 0x01,
-//		BUFFER_RECEIVE_INCR_bm = 0x02,
-//		BUFFER_TRANSMIT_IS_NOT_ZERO_bm = 0x04,
-//		BUFFER_RECEIVE_IS_NOT_ZERO_bm = 0x08,
-//		BUFFER_IS_DUMMY_bm = 0x10,
-//		BUFFER_IS_BUSY_SYNC_bm = 0x20
-//	};
-//	static uint8_t status(0);
 }
 
 // ----------------------------------------------------------------------------
+
 void
 xpcc::stm32::SpiSlave2::configurePins(Mapping mapping)
 {
@@ -66,7 +58,7 @@ xpcc::stm32::SpiSlave2::configurePins(Mapping mapping)
 	RCC->APB1ENR |= RCC_APB1ENR_SPI2EN;
 	
 	// Initialize IO pins
-#if defined(STM32F2XX) || defined(STM32F4XX)
+#if defined(STM32F4XX)
 	(void) mapping;		// avoid compiler warning
 	
 	NssB12::setAlternateFunction(AF_SPI2);
@@ -74,16 +66,12 @@ xpcc::stm32::SpiSlave2::configurePins(Mapping mapping)
 	MisoB14::setAlternateFunction(AF_SPI2);
 	MosiB15::setAlternateFunction(AF_SPI2, xpcc::stm32::PUSH_PULL);
 #else
-	(void) mapping;		// avoid compiler warning
-	
-	SckB13::setAlternateFunction(xpcc::stm32::FLOATING);
-	MisoB14::setInput(xpcc::stm32::FLOATING);
-	MosiB15::setAlternateFunction(xpcc::stm32::PUSH_PULL);
+#error "Only STM32F4 is supported and tested. F2 might work, too."
 #endif
 }
 
-
 // ----------------------------------------------------------------------------
+
 void
 xpcc::stm32::SpiSlave2::initialize(Mode mode, DataSize datasize)
 {
@@ -92,39 +80,33 @@ xpcc::stm32::SpiSlave2::initialize(Mode mode, DataSize datasize)
 	RCC->APB1RSTR |=  RCC_APB1RSTR_SPI2RST;
 	RCC->APB1RSTR &= ~RCC_APB1RSTR_SPI2RST;
 	
-	// disable all interrupts
-	//SPI2->CR2 = ~(SPI_CR2_TXEIE  | SPI_CR2_RXNEIE  | SPI_CR2_ERRIE);
-	
 	// disable peripheral
 	SPI2->CR1 &= ~SPI_CR1_SPE;
 	
-	// enable interrupts
-	SPI2->CR2 = SPI_CR2_RXNEIE; // | SPI_CR2_TXEIE;
-			
-	// slave mode: CR1_MSTR = '0'
-	// NSS not fixed: CR1_SSM = '0'
-	// Motorola Mode: CR2_FRF = '0'
+	// reset CR1
+	// SPI_CR1_MSTR = 0: slave mode
+	// SPI_CR1_SSM = 0: NSS software management disabled
+	SPI2->CR1 = 0x00;
+	
+	// reset CR2
+	// SPI_CR2_FRF = 0: motorola mode
+	SPI2->CR2 &= ~(SPI_CR2_TXEIE | SPI_CR2_RXNEIE | SPI_CR2_ERRIE | SPI_CR2_FRF | SPI_CR2_SSOE | SPI_CR2_TXDMAEN | SPI_CR2_RXDMAEN);
+	
+	
+	// enable rx interrupt
+	SPI2->CR2 |= SPI_CR2_RXNEIE;
 	
 	// set data size
-	SPI2->CR1 = datasize | mode;// | SPI_CR1_LSBFIRST;
-	
 	// set clock polarity and phase
-	//SPI2->CR1 |= mode;
+	SPI2->CR1 |= datasize | mode;
 		
 	// reenable peripheral
 	SPI2->CR1 |= SPI_CR1_SPE;
 	
+	// clear data register
 	SPI2->DR = 0;
 }
 	
-// ----------------------------------------------------------------------------
-
-//bool
-//xpcc::stm32::SpiSlave2::isFinished()
-//{
-//	return !(status & BUFFER_IS_BUSY_SYNC_bm);
-//}
-
 // ----------------------------------------------------------------------------
 
 uint16_t
@@ -137,21 +119,14 @@ xpcc::stm32::SpiSlave2::read()
 
 bool
 xpcc::stm32::SpiSlave2::rxBufferNotEmpty() 
-{
-	
+{	
 	return SPI2->SR & SPI_SR_RXNE;
-//	
-//	if(SPI2->SR & SPI_SR_RXNE) {
-//		return true;
-//	} else {
-//		return false;
-//	}
 }
 
 // ----------------------------------------------------------------------------
+
 void
-xpcc::stm32::SpiSlave2::enableInterruptVector(bool enable,
-uint32_t priority)
+xpcc::stm32::SpiSlave2::enableInterruptVector(bool enable, uint32_t priority)
 {
 	if (enable) {
 		// Set priority for the interrupt vector
@@ -164,5 +139,3 @@ uint32_t priority)
 		NVIC_DisableIRQ(SPI2_IRQn);
 	}
 }
-
-

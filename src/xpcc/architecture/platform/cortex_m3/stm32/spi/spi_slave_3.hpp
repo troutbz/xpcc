@@ -46,11 +46,7 @@ namespace xpcc
 		/**
 		 * @brief		Serial peripheral interface (SPI3)
 		 * 
-		 * Simple unbuffered implementation.
-		 * 
-		 * STM32F10x:
-		 * - SPI1 (APB2) at 72MHz
-		 * - SPI2 and SPI3 (APB1) at 36MHz.
+		 * Simple unbuffered slave implementation.
 		 * 
 		 * STM32F2:
 		 * - TODO
@@ -80,22 +76,17 @@ namespace xpcc
 			
 			enum Mapping
 			{
-#if defined(STM32F2XX) || defined(STM32F4XX)
+#if defined(STM32F4XX)
 				REMAP_PA15_PB3_PB4_PB5,		///< NSS/PA15, SCK/PB3,  MISO/PB4,  MOSI/PB5,  NSS/PA15
 				REMAP_PA4_PC10_PC11_PC12,	///< NSS/PA4,  SCK/PC10, MISO/PC11, MOSI/PC12, NSS/PA4
 #else
-				REMAP_PB3_PB4_PB5 = 0,							///< SCK/PB3, MISO/PB4, MOSI/PB5, NSS/PA15
-#	if defined(STM32F10X_CL) 
-				REMAP_PC10_PC11_PC12 = AFIO_MAPR_SPI3_REMAP,	///< SCK/PC10, MISO/PC11, MOSI/PC12, NSS/PA4
-#	endif
+#error "Only STM32F4 is supported and tested. F2 might work, too."
 #endif
 			};
 			
 			/**
 			 * Configure the IO Pins for SPI3
 			 * 
-			 * \warning	NSS is not configured and has to be handled
-			 * 			by the user!
 			 */
 			static void
 			configurePins(Mapping mapping);
@@ -116,24 +107,8 @@ namespace xpcc
 			static void
 			enableInterruptVector(bool enable, uint32_t priority);
 			
-//			static uint8_t
-//			write(uint8_t data);
-			
-//			static bool
-//			setBuffer(uint16_t length,
-//					  uint8_t* transmit=0, uint8_t* receive=0,
-//					  BufferIncrease bufferIncrease=BUFFER_INCR_BOTH);
-//			
-//			static bool
-//			transfer(TransferOptions options=TRANSFER_SEND_BUFFER_SAVE_RECEIVE);
-//			
-//			static ALWAYS_INLINE bool
-//			transferSync(TransferOptions options=TRANSFER_SEND_BUFFER_SAVE_RECEIVE);
-			
-//			static bool
-//			isFinished();
 		};
 	}
 }
 
-#endif // XPCC_STM32__SPI_3_HPP
+#endif // XPCC_STM32__SPI_SLAVE_3_HPP
