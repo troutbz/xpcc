@@ -106,7 +106,7 @@ xpcc::stm32::SpiSlave2::initialize(Mode mode, DataSize datasize)
 	// Motorola Mode: CR2_FRF = '0'
 	
 	// set data size
-	SPI2->CR1 = datasize | mode | SPI_CR1_LSBFIRST;
+	SPI2->CR1 = datasize | mode;// | SPI_CR1_LSBFIRST;
 	
 	// set clock polarity and phase
 	//SPI2->CR1 |= mode;
