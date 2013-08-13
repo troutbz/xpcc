@@ -137,9 +137,9 @@
 
 #include "stm32/uart/usart_6.hpp"
 
-#include "stm32/spi/spi_1.hpp"
-#include "stm32/spi/spi_2.hpp"
-#include "stm32/spi/spi_3.hpp"
+#include "stm32/spi/spi_master_1.hpp"
+#include "stm32/spi/spi_master_2.hpp"
+#include "stm32/spi/spi_master_3.hpp"
 
 
 
