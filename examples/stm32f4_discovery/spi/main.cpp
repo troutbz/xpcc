@@ -44,7 +44,7 @@ initSpi()
 	SpiSlave1::enableInterruptVector(true, 1);
 
 	SpiMaster3::configurePins(SpiMaster3::REMAP_PA15_PB3_PB4_PB5);
-	SpiMaster3::initialize(SpiMaster3::MODE_0, SpiMaster3::PRESCALER_2);
+	SpiMaster3::initialize(SpiMaster3::MODE_0, SpiMaster3::PRESCALER_8);
 }
 
 // ----------------------------------------------------------------------------
@@ -67,6 +67,8 @@ MAIN_FUNCTION
 	initSpi();
 	initUart();
 
+	//SysTickTimer::enable();
+
 
 	LedGreen::setOutput(xpcc::gpio::LOW);
 	LedBlue::setOutput(xpcc::gpio::LOW);
@@ -79,7 +81,7 @@ MAIN_FUNCTION
 
 		LedGreen::toggle();
 
-		xpcc::delay_ms(1000);
+		xpcc::delay_ms(50);
 
 	}
 

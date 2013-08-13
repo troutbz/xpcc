@@ -21,6 +21,8 @@ MAIN_FUNCTION
 {
 	initClock();
 
+
+
 	uart.write('H');
 	uart.write('e');
 	uart.write('l');
