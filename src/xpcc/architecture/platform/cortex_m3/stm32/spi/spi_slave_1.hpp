@@ -33,12 +33,11 @@
  */
 // ----------------------------------------------------------------------------
 
-#ifndef XPCC_STM32__SPI_MASTER_1_HPP
-#define XPCC_STM32__SPI_MASTER_1_HPP
+#ifndef XPCC_STM32__SPI_SLAVE_1_HPP
+#define XPCC_STM32__SPI_SLAVE_1_HPP
 
 #include <stdint.h>
 #include "../device.h"
-#include <xpcc/driver/connectivity/spi/spi_master.hpp>
 
 namespace xpcc
 {
@@ -62,7 +61,7 @@ namespace xpcc
 		 * 
 		 * @ingroup		stm32
 		 */
-		class SpiMaster1 : public xpcc::SpiMaster
+		class SpiSlave1
 		{
 		public:
 			enum Mode
@@ -73,16 +72,10 @@ namespace xpcc
 				MODE_3 = SPI_CR1_CPOL | SPI_CR1_CPHA,	///< SCK inverted, sample on rising edge
 			};
 			
-			enum Prescaler
+			enum DataSize
 			{
-				PRESCALER_2 = 0,
-				PRESCALER_4 = SPI_CR1_BR_0,
-				PRESCALER_8 = SPI_CR1_BR_1,
-				PRESCALER_16 = SPI_CR1_BR_1 | SPI_CR1_BR_0,
-				PRESCALER_32 = SPI_CR1_BR_2,
-				PRESCALER_64 = SPI_CR1_BR_2 | SPI_CR1_BR_0,
-				PRESCALER_128 = SPI_CR1_BR_2 | SPI_CR1_BR_1,
-				PRESCALER_256 = SPI_CR1_BR_2 | SPI_CR1_BR_1 | SPI_CR1_BR_0,
+				DATA_8_BIT = 0,
+				DATA_16_BIT = SPI_CR1_DFF,
 			};
 			
 			enum Mapping
@@ -110,24 +103,31 @@ namespace xpcc
 			 * @brief	Initialize SPI module
 			 */
 			static void
-			initialize(Mode mode = MODE_0, Prescaler prescaler = PRESCALER_64);
+			initialize(Mode mode = MODE_0, DataSize datasize = DATA_16_BIT);
 			
-			static uint8_t
-			write(uint8_t data);
+			static uint16_t
+			read();
 			
-			static bool
-			setBuffer(uint16_t length,
-					  uint8_t* transmit=0, uint8_t* receive=0,
-					  BufferIncrease bufferIncrease=BUFFER_INCR_BOTH);
 			
-			static bool
-			transfer(TransferOptions options=TRANSFER_SEND_BUFFER_SAVE_RECEIVE);
+			static void
+			enableInterruptVector(bool enable, uint32_t priority);
 			
-			static ALWAYS_INLINE bool
-			transferSync(TransferOptions options=TRANSFER_SEND_BUFFER_SAVE_RECEIVE);
+//			static uint8_t
+//			write(uint8_t data);
 			
-			static bool
-			isFinished();
+//			static bool
+//			setBuffer(uint16_t length,
+//					  uint8_t* transmit=0, uint8_t* receive=0,
+//					  BufferIncrease bufferIncrease=BUFFER_INCR_BOTH);
+//			
+//			static bool
+//			transfer(TransferOptions options=TRANSFER_SEND_BUFFER_SAVE_RECEIVE);
+//			
+//			static ALWAYS_INLINE bool
+//			transferSync(TransferOptions options=TRANSFER_SEND_BUFFER_SAVE_RECEIVE);
+			
+//			static bool
+//			isFinished();
 		};
 	}
 }

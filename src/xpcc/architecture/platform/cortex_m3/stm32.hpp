@@ -141,6 +141,10 @@
 #include "stm32/spi/spi_master_2.hpp"
 #include "stm32/spi/spi_master_3.hpp"
 
+#include "stm32/spi/spi_slave_1.hpp"
+#include "stm32/spi/spi_slave_2.hpp"
+#include "stm32/spi/spi_slave_3.hpp"
+
 
 
 #include "stm32/i2c/i2c_master_1.hpp"

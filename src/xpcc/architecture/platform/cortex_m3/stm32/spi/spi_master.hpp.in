@@ -29,8 +29,8 @@
 // ----------------------------------------------------------------------------
 {{ generation_block }}
 
-#ifndef XPCC_STM32__SPI_{{ id }}_HPP
-#define XPCC_STM32__SPI_{{ id }}_HPP
+#ifndef XPCC_STM32__SPI_MASTER_{{ id }}_HPP
+#define XPCC_STM32__SPI_MASTER_{{ id }}_HPP
 
 #include <stdint.h>
 #include "../device.h"
@@ -85,16 +85,16 @@ namespace xpcc
 			{
 #if defined(STM32F2XX) || defined(STM32F4XX)
 				{% if id == 1 -%}
-				REMAP_PA5_PA6_PA7,		///< SCK/PA5, MISO/PA6, MOSI/PA7, NSS/PA4 
-				REMAP_PB3_PB4_PB5,		///< SCK/PB3, MISO/PB4, MOSI/PB5, NSS/PA15
+				REMAP_PA4_PA5_PA6_PA7,		///< NSS/PA4,  SCK/PA5,  MISO/PA6,  MOSI/PA7,  NSS/PA4 
+				REMAP_PA15_PB3_PB4_PB5,		///< NSS/PA15, SCK/PB3,  MISO/PB4,  MOSI/PB5,  NSS/PA15
 				{%- elif id == 2 -%}
-				REMAP_PB13_PB14_PB15,	///< SCK/PB13, MISO/PB14, MOSI/PB15, NSS/PB12
+				REMAP_PB12_PB13_PB14_PB15,	///< NSS/PB12, SCK/PB13, MISO/PB14, MOSI/PB15, NSS/PB12
 				
 				// TODO PB9..15, PC2..3
 				//REMAP_PI1_PI2_PI3,		///< SCK/PI1, MISO/PI2, MOSI/PI3, NSS/PI0
 				{%- elif id == 3 -%}
-				REMAP_PB3_PB4_PB5,		///< SCK/PB3, MISO/PB4, MOSI/PB5, NSS/PA15
-				REMAP_PC10_PC11_PC12,	///< SCK/PC10, MISO/PC11, MOSI/PC12, NSS/PA4
+				REMAP_PA15_PB3_PB4_PB5,		///< NSS/PA15, SCK/PB3,  MISO/PB4,  MOSI/PB5,  NSS/PA15
+				REMAP_PA4_PC10_PC11_PC12,	///< NSS/PA4,  SCK/PC10, MISO/PC11, MOSI/PC12, NSS/PA4
 				{%- endif %}
 #else
 				{% if id == 1 -%}

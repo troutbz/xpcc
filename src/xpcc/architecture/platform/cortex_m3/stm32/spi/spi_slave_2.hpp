@@ -33,19 +33,18 @@
  */
 // ----------------------------------------------------------------------------
 
-#ifndef XPCC_STM32__SPI_MASTER_1_HPP
-#define XPCC_STM32__SPI_MASTER_1_HPP
+#ifndef XPCC_STM32__SPI_SLAVE_2_HPP
+#define XPCC_STM32__SPI_SLAVE_2_HPP
 
 #include <stdint.h>
 #include "../device.h"
-#include <xpcc/driver/connectivity/spi/spi_master.hpp>
 
 namespace xpcc
 {
 	namespace stm32
 	{
 		/**
-		 * @brief		Serial peripheral interface (SPI1)
+		 * @brief		Serial peripheral interface (SPI2)
 		 * 
 		 * Simple unbuffered implementation.
 		 * 
@@ -62,7 +61,7 @@ namespace xpcc
 		 * 
 		 * @ingroup		stm32
 		 */
-		class SpiMaster1 : public xpcc::SpiMaster
+		class SpiSlave2
 		{
 		public:
 			enum Mode
@@ -73,31 +72,26 @@ namespace xpcc
 				MODE_3 = SPI_CR1_CPOL | SPI_CR1_CPHA,	///< SCK inverted, sample on rising edge
 			};
 			
-			enum Prescaler
+			enum DataSize
 			{
-				PRESCALER_2 = 0,
-				PRESCALER_4 = SPI_CR1_BR_0,
-				PRESCALER_8 = SPI_CR1_BR_1,
-				PRESCALER_16 = SPI_CR1_BR_1 | SPI_CR1_BR_0,
-				PRESCALER_32 = SPI_CR1_BR_2,
-				PRESCALER_64 = SPI_CR1_BR_2 | SPI_CR1_BR_0,
-				PRESCALER_128 = SPI_CR1_BR_2 | SPI_CR1_BR_1,
-				PRESCALER_256 = SPI_CR1_BR_2 | SPI_CR1_BR_1 | SPI_CR1_BR_0,
+				DATA_8_BIT = 0,
+				DATA_16_BIT = SPI_CR1_DFF,
 			};
 			
 			enum Mapping
 			{
 #if defined(STM32F2XX) || defined(STM32F4XX)
-				REMAP_PA4_PA5_PA6_PA7,		///< NSS/PA4,  SCK/PA5,  MISO/PA6,  MOSI/PA7,  NSS/PA4 
-				REMAP_PA15_PB3_PB4_PB5,		///< NSS/PA15, SCK/PB3,  MISO/PB4,  MOSI/PB5,  NSS/PA15
+				REMAP_PB12_PB13_PB14_PB15,	///< NSS/PB12, SCK/PB13, MISO/PB14, MOSI/PB15, NSS/PB12
+				
+				// TODO PB9..15, PC2..3
+				//REMAP_PI1_PI2_PI3,		///< SCK/PI1, MISO/PI2, MOSI/PI3, NSS/PI0
 #else
-				REMAP_PA5_PA6_PA7 = 0,							///< SCK/PA5, MISO/PA6, MOSI/PA7, NSS/PA4 
-				REMAP_PB3_PB4_PB5 = AFIO_MAPR_SPI1_REMAP,		///< SCK/PB3, MISO/PB4, MOSI/PB5, NSS/PA15
+				REMAP_PB13_PB14_PB15,							///< SCK/PB13, MISO/PB14, MOSI/PB15, NSS/PB12
 #endif
 			};
 			
 			/**
-			 * Configure the IO Pins for SPI1
+			 * Configure the IO Pins for SPI2
 			 * 
 			 * \warning	NSS is not configured and has to be handled
 			 * 			by the user!
@@ -110,26 +104,33 @@ namespace xpcc
 			 * @brief	Initialize SPI module
 			 */
 			static void
-			initialize(Mode mode = MODE_0, Prescaler prescaler = PRESCALER_64);
+			initialize(Mode mode = MODE_0, DataSize datasize = DATA_16_BIT);
 			
-			static uint8_t
-			write(uint8_t data);
+			static uint16_t
+			read();
 			
-			static bool
-			setBuffer(uint16_t length,
-					  uint8_t* transmit=0, uint8_t* receive=0,
-					  BufferIncrease bufferIncrease=BUFFER_INCR_BOTH);
 			
-			static bool
-			transfer(TransferOptions options=TRANSFER_SEND_BUFFER_SAVE_RECEIVE);
+			static void
+			enableInterruptVector(bool enable, uint32_t priority);
 			
-			static ALWAYS_INLINE bool
-			transferSync(TransferOptions options=TRANSFER_SEND_BUFFER_SAVE_RECEIVE);
+//			static uint8_t
+//			write(uint8_t data);
 			
-			static bool
-			isFinished();
+//			static bool
+//			setBuffer(uint16_t length,
+//					  uint8_t* transmit=0, uint8_t* receive=0,
+//					  BufferIncrease bufferIncrease=BUFFER_INCR_BOTH);
+//			
+//			static bool
+//			transfer(TransferOptions options=TRANSFER_SEND_BUFFER_SAVE_RECEIVE);
+//			
+//			static ALWAYS_INLINE bool
+//			transferSync(TransferOptions options=TRANSFER_SEND_BUFFER_SAVE_RECEIVE);
+			
+//			static bool
+//			isFinished();
 		};
 	}
 }
 
-#endif // XPCC_STM32__SPI_1_HPP
+#endif // XPCC_STM32__SPI_2_HPP

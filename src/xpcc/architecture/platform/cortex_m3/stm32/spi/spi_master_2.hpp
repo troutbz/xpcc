@@ -33,8 +33,8 @@
  */
 // ----------------------------------------------------------------------------
 
-#ifndef XPCC_STM32__SPI_2_HPP
-#define XPCC_STM32__SPI_2_HPP
+#ifndef XPCC_STM32__SPI_MASTER_2_HPP
+#define XPCC_STM32__SPI_MASTER_2_HPP
 
 #include <stdint.h>
 #include "../device.h"
@@ -88,7 +88,7 @@ namespace xpcc
 			enum Mapping
 			{
 #if defined(STM32F2XX) || defined(STM32F4XX)
-				REMAP_PB13_PB14_PB15,	///< SCK/PB13, MISO/PB14, MOSI/PB15, NSS/PB12
+				REMAP_PB12_PB13_PB14_PB15,	///< NSS/PB12, SCK/PB13, MISO/PB14, MOSI/PB15, NSS/PB12
 				
 				// TODO PB9..15, PC2..3
 				//REMAP_PI1_PI2_PI3,		///< SCK/PI1, MISO/PI2, MOSI/PI3, NSS/PI0

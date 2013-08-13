@@ -34,7 +34,7 @@
 // ----------------------------------------------------------------------------
 
 #include "../gpio.hpp"
-#include "spi_master_2.hpp"
+#include "spi_slave_2.hpp"
 
 namespace
 {
@@ -43,24 +43,24 @@ namespace
 	GPIO__INPUT(MisoB14, B, 14);
 	GPIO__OUTPUT(MosiB15, B, 15);
 	
-	static uint8_t* transmitBuffer(0);
-	static uint8_t* receiveBuffer(0);
-	static uint16_t bufferLength(0);
-	enum
-	{
-		BUFFER_TRANSMIT_INCR_bm = 0x01,
-		BUFFER_RECEIVE_INCR_bm = 0x02,
-		BUFFER_TRANSMIT_IS_NOT_ZERO_bm = 0x04,
-		BUFFER_RECEIVE_IS_NOT_ZERO_bm = 0x08,
-		BUFFER_IS_DUMMY_bm = 0x10,
-		BUFFER_IS_BUSY_SYNC_bm = 0x20
-	};
-	static uint8_t status(0);
+//	static uint8_t* transmitBuffer(0);
+//	static uint8_t* receiveBuffer(0);
+//	static uint16_t bufferLength(0);
+//	enum
+//	{
+//		BUFFER_TRANSMIT_INCR_bm = 0x01,
+//		BUFFER_RECEIVE_INCR_bm = 0x02,
+//		BUFFER_TRANSMIT_IS_NOT_ZERO_bm = 0x04,
+//		BUFFER_RECEIVE_IS_NOT_ZERO_bm = 0x08,
+//		BUFFER_IS_DUMMY_bm = 0x10,
+//		BUFFER_IS_BUSY_SYNC_bm = 0x20
+//	};
+//	static uint8_t status(0);
 }
 
 // ----------------------------------------------------------------------------
 void
-xpcc::stm32::SpiMaster2::configurePins(Mapping mapping)
+xpcc::stm32::SpiSlave2::configurePins(Mapping mapping)
 {
 	// Enable clock
 	RCC->APB1ENR |= RCC_APB1ENR_SPI2EN;
@@ -76,7 +76,7 @@ xpcc::stm32::SpiMaster2::configurePins(Mapping mapping)
 #else
 	(void) mapping;		// avoid compiler warning
 	
-	SckB13::setAlternateFunction(xpcc::stm32::PUSH_PULL);
+	SckB13::setAlternateFunction(xpcc::stm32::FLOATING);
 	MisoB14::setInput(xpcc::stm32::FLOATING);
 	MosiB15::setAlternateFunction(xpcc::stm32::PUSH_PULL);
 #endif
@@ -85,7 +85,7 @@ xpcc::stm32::SpiMaster2::configurePins(Mapping mapping)
 
 // ----------------------------------------------------------------------------
 void
-xpcc::stm32::SpiMaster2::initialize(Mode mode, Prescaler prescaler)
+xpcc::stm32::SpiSlave2::initialize(Mode mode, DataSize datasize)
 {
 	RCC->APB1ENR |= RCC_APB1ENR_SPI2EN;
 	
@@ -98,89 +98,51 @@ xpcc::stm32::SpiMaster2::initialize(Mode mode, Prescaler prescaler)
 	// disable peripheral
 	SPI2->CR1 &= ~SPI_CR1_SPE;
 	
-	// set new mode
-	SPI2->CR1 = prescaler | mode | SPI_CR1_MSTR | SPI_CR1_SSM | SPI_CR1_SSI;
-	    
+	// slave mode: CR1_MSTR = '0'
+	// NSS not fixed: CR1_SSM = '0'
+	// Motorola Mode: CR2_FRF = '0'
+	
+	// set data size
+	SPI2->CR1 |= datasize;
+	
+	// set slave mode with NSS not fixed
+	SPI2->CR1 = mode;
+		
 	// reenable peripheral
 	SPI2->CR1 |= SPI_CR1_SPE;
 }
 	
 // ----------------------------------------------------------------------------
-bool
-xpcc::stm32::SpiMaster2::setBuffer(uint16_t length, uint8_t* transmit, uint8_t* receive, BufferIncrease bufferIncrease)
-{
-	if (!isFinished()) {
-		return false;
-	}
-	
-	transmitBuffer = transmit;
-	receiveBuffer = receive ? receive : transmit;
-	bufferLength = length;
-	
-	status &= ~(BUFFER_TRANSMIT_INCR_bm | BUFFER_RECEIVE_INCR_bm);
-	status |= bufferIncrease;
-	
-	return true;
-}
 
-bool
-xpcc::stm32::SpiMaster2::transfer(TransferOptions options)
-{
-	if (status & BUFFER_IS_BUSY_SYNC_bm) {
-		return false;
-	}
-	
-	uint8_t rx(0), tx(0xff);
-	// send the buffer out, blocking
-	status |= BUFFER_IS_BUSY_SYNC_bm;
-	// check if we have to use a dummy buffer
-	bool transmit = (options & TRANSFER_SEND_BUFFER_DISCARD_RECEIVE) & static_cast<bool>(transmitBuffer);
-	bool receive = (options & TRANSFER_SEND_DUMMY_SAVE_RECEIVE) & static_cast<bool>(receiveBuffer);
-	
-	for(uint_fast16_t i=0; i < bufferLength; ++i)
-	{
-		if (transmit) {
-			tx = transmitBuffer[(status & BUFFER_TRANSMIT_INCR_bm) ? i : bufferLength-1-i];
-		}
-		
-		rx = write(tx);
-		
-		if (receive) {
-			receiveBuffer[(status & BUFFER_RECEIVE_INCR_bm) ? i : bufferLength-1-i] = rx;
-		}
-	}
-	
-	status &= ~BUFFER_IS_BUSY_SYNC_bm;
-	
-	return true;
-}
+//bool
+//xpcc::stm32::SpiSlave2::isFinished()
+//{
+//	return !(status & BUFFER_IS_BUSY_SYNC_bm);
+//}
 
-bool
-xpcc::stm32::SpiMaster2::transferSync(TransferOptions options)
-{
-	return transfer(options);
-}
+// ----------------------------------------------------------------------------
 
-bool
-xpcc::stm32::SpiMaster2::isFinished()
+uint16_t
+xpcc::stm32::SpiSlave2::read() 
 {
-	return !(status & BUFFER_IS_BUSY_SYNC_bm);
+	return SPI2->DR;
 }
 
 // ----------------------------------------------------------------------------
-uint8_t
-xpcc::stm32::SpiMaster2::write(uint8_t data)
+void
+xpcc::stm32::SpiSlave2::enableInterruptVector(bool enable,
+uint32_t priority)
 {
-	while (!(SPI2->SR & SPI_SR_TXE)) {
-		// wait until the previous transmission is finished
+	if (enable) {
+		// Set priority for the interrupt vector
+		NVIC_SetPriority(SPI1_IRQn, priority);
+		
+		// register IRQ at the NVIC
+		NVIC_EnableIRQ(SPI1_IRQn);
 	}
-	
-	SPI2->DR = data;
-	
-	while (!(SPI2->SR & SPI_SR_RXNE)) {
-		// wait until the data is received
+	else {
+		NVIC_DisableIRQ(SPI1_IRQn);
 	}
-	
-	return SPI2->DR;
 }
+
 
