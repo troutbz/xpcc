@@ -4,19 +4,14 @@
 #include "parallel_tft.hpp"
 #include <xpcc/driver/ui/display/image.hpp>
 #include <xpcc/driver/ui/touchscreen/ads7843.hpp>
-#include <xpcc/architecture/driver/gpio.hpp>
 
 #include "touchscreen_calibrator.hpp"
 
 using namespace xpcc::stm32;
 
-
-typedef xpcc::stm32::Usart1 uart;
-
-
 // ----------------------------------------------------------------------------
-//GPIO__OUTPUT(LedOrange, D, 13);		// User LED 3
-//GPIO__OUTPUT(LedGreen, D, 12);		// User LED 4
+GPIO__OUTPUT(LedOrange, D, 13);		// User LED 3
+GPIO__OUTPUT(LedGreen, D, 12);		// User LED 4
 //GPIO__OUTPUT(LedRed, D, 14);		// User LED 5 (used as FSMC D0)
 //GPIO__OUTPUT(LedBlue, D, 15);		// User LED 6 (used as FSMC D1)
 
@@ -25,68 +20,45 @@ GPIO__OUTPUT(VBusPresent, A, 9);		// green LED (LD7)
 
 GPIO__INPUT(Button, A, 0);
 
+// FSMC
+GPIO__IO(D0, D, 14);
+GPIO__IO(D1, D, 15);
+GPIO__IO(D2, D, 0);
+GPIO__IO(D3, D, 1);
+GPIO__IO(D4, E, 7);
+GPIO__IO(D5, E, 8);
+GPIO__IO(D6, E, 9);
+GPIO__IO(D7, E, 10);
+GPIO__IO(D8, E, 11);
+GPIO__IO(D9, E, 12);
+GPIO__IO(D10, E, 13);
+GPIO__IO(D11, E, 14);
+GPIO__IO(D12, E, 15);
+GPIO__IO(D13, D, 8);
+GPIO__IO(D14, D, 9);
+GPIO__IO(D15, D, 10);
 
-GPIO__OUTPUT(Trigger, D, 6);
+GPIO__OUTPUT(A16, D, 11);
+GPIO__OUTPUT(A23, E, 2);
 
-// 16bit databus
-GPIO__IO(D0,  E, 7);
-GPIO__IO(D1,  E, 8);
-GPIO__IO(D2,  E, 9);
-GPIO__IO(D3,  E, 10);
-GPIO__IO(D4,  E, 11);
-GPIO__IO(D5,  E, 12);
-GPIO__IO(D6,  E, 13);
-GPIO__IO(D7,  E, 14);
-GPIO__IO(D8,  E, 15);
-GPIO__IO(D9,  B, 10);
-GPIO__IO(D10, B, 11);
-GPIO__IO(D11, B, 15);
-GPIO__IO(D12, D, 10);
-GPIO__IO(D13, D, 9);
-GPIO__IO(D14, D, 12);
-GPIO__IO(D15, D, 11);
+GPIO__OUTPUT(NOE, D, 4);
+GPIO__OUTPUT(NWE, D, 5);
 
-GPIO__OUTPUT(Cs, 	C, 14);
-GPIO__OUTPUT(Reset, C, 15);
+GPIO__OUTPUT(CS, D, 7);
 
-GPIO__OUTPUT(Rs, D, 14);
-GPIO__OUTPUT(Wr, D, 13);
-GPIO__OUTPUT(Rd, D, 15);
+xpcc::TftMemoryBus parallelBus(
+		(volatile uint16_t *) 0x60000000,
+		(volatile uint16_t *) 0x60020000);
 
-
-typedef xpcc::gpio::DoublePort<D15,
-						 D14,
-						 D13,
-						 D12,
-						 D11,
-						 D10,
-						 D9,
-						 D8,
-						 D7,
-						 D6,
-						 D5,
-						 D4,
-						 D3,
-						 D2,
-						 D1,
-						 D0> Port;
-
-typedef xpcc::TftGpio<Port, Reset, Cs, Wr, Rd, Rs> GpioBus;
-
-GpioBus gpioBus;
-
-
-xpcc::ParallelTft<GpioBus> tft(gpioBus);
-
-
+xpcc::ParallelTft<xpcc::TftMemoryBus> tft(parallelBus);
 
 // ----------------------------------------------------------------------------
 // Touchscreen
-//GPIO__OUTPUT(CsTouchscreen, C, 4);
-//GPIO__INPUT(Int, C, 5);
+GPIO__OUTPUT(CsTouchscreen, C, 4);
+GPIO__INPUT(Int, C, 5);
 
-//xpcc::Ads7843<SpiMaster2, CsTouchscreen, Int> ads7843;
-//xpcc::TouchscreenCalibrator touchscreen;
+xpcc::Ads7843<SpiMaster2, CsTouchscreen, Int> ads7843;
+xpcc::TouchscreenCalibrator touchscreen;
 
 // ----------------------------------------------------------------------------
 static bool
@@ -101,41 +73,60 @@ initClock()
 	return Clock::switchToPll();
 }
 
-
-static void
-initUart() {
-
-
-
-	uart::configurePins(uart::REMAP_PB6_PB7);
-	uart::setBaudrate(9600);
-
-	uart::write('H');
-	uart::write('e');
-	uart::write('l');
-	uart::write('l');
-	uart::write('o');
-	uart::write('\r');
-	uart::write('\n');
-
-
-}
-
 static void
 initDisplay()
 {
-	Port::setOutput();
+	Fsmc::initialize();
 	
-	Rd::setOutput();
-	Wr::setOutput();
-	Rs::setOutput();
+	D0::setAlternateFunction(AF_FSMC, PUSH_PULL, SPEED_100MHZ);
+	D1::setAlternateFunction(AF_FSMC, PUSH_PULL, SPEED_100MHZ);
+	D2::setAlternateFunction(AF_FSMC, PUSH_PULL, SPEED_100MHZ);
+	D3::setAlternateFunction(AF_FSMC, PUSH_PULL, SPEED_100MHZ);
+	D4::setAlternateFunction(AF_FSMC, PUSH_PULL, SPEED_100MHZ);
+	D5::setAlternateFunction(AF_FSMC, PUSH_PULL, SPEED_100MHZ);
+	D6::setAlternateFunction(AF_FSMC, PUSH_PULL, SPEED_100MHZ);
+	D7::setAlternateFunction(AF_FSMC, PUSH_PULL, SPEED_100MHZ);
+	D8::setAlternateFunction(AF_FSMC, PUSH_PULL, SPEED_100MHZ);
+	D9::setAlternateFunction(AF_FSMC, PUSH_PULL, SPEED_100MHZ);
+	D10::setAlternateFunction(AF_FSMC, PUSH_PULL, SPEED_100MHZ);
+	D11::setAlternateFunction(AF_FSMC, PUSH_PULL, SPEED_100MHZ);
+	D12::setAlternateFunction(AF_FSMC, PUSH_PULL, SPEED_100MHZ);
+	D13::setAlternateFunction(AF_FSMC, PUSH_PULL, SPEED_100MHZ);
+	D14::setAlternateFunction(AF_FSMC, PUSH_PULL, SPEED_100MHZ);
+	D15::setAlternateFunction(AF_FSMC, PUSH_PULL, SPEED_100MHZ);
 	
-	Reset::setOutput();
-	Reset::set();
+	A16::setAlternateFunction(AF_FSMC, PUSH_PULL, SPEED_100MHZ);
+	A23::setAlternateFunction(AF_FSMC, PUSH_PULL, SPEED_100MHZ);
 	
-	Cs::setOutput();
-	Cs::set();
+	NOE::setAlternateFunction(AF_FSMC, PUSH_PULL, SPEED_100MHZ);
+	NWE::setAlternateFunction(AF_FSMC, PUSH_PULL, SPEED_100MHZ);
 	
+	CS::setOutput();
+	CS::reset();
+	
+	fsmc::NorSram::AsynchronousTiming timing = {
+		// read
+		15,
+		0,
+		15,
+		
+		// write
+		15,
+		0,
+		15,
+		
+		// bus turn around 
+		0
+	};
+	
+	fsmc::NorSram::configureAsynchronousRegion(
+			fsmc::NorSram::CHIP_SELECT_1,
+			fsmc::NorSram::NO_MULTIPLEX_16BIT,
+			fsmc::NorSram::SRAM_ROM,
+			fsmc::NorSram::MODE_A,
+			timing);
+	
+	fsmc::NorSram::enableRegion(fsmc::NorSram::CHIP_SELECT_1);
 	
 	tft.initialize();
 }
@@ -143,14 +134,13 @@ initDisplay()
 static void
 initTouchscreen()
 {
-/*	CsTouchscreen::setOutput();
+	CsTouchscreen::setOutput();
 	CsTouchscreen::set();
 	
 	Int::setInput(PULLUP);
 
 	SpiMaster2::initialize(SpiMaster2::MODE_0, SpiMaster2::PRESCALER_64);
 	SpiMaster2::configurePins(SpiMaster2::REMAP_PB13_PB14_PB15);
-	*/
 }
 
 // ----------------------------------------------------------------------------
@@ -193,15 +183,14 @@ calibrateTouchscreen(xpcc::GraphicDisplay& display)
 		
 		drawCross(display, calibrationPoint[i]);
 		xpcc::delay_ms(500);
-		/*
+		
 		while (!ads7843.read(&sample[i])) {
 			// wait until a valid sample can be taken
 		}
-		*/
 	}
-	/*
+	
 	touchscreen.calibrate(calibrationPoint, sample);
-	*/
+	
 	display.clear();
 }
 
@@ -223,136 +212,37 @@ MAIN_FUNCTION
 {
 	initClock();
 
-	initUart();
-
-//	Port::setOutput();
-//
-
-//	while(1) {
-//
-//		gpioBus.writeData(0xFFFF);
-//
-//		xpcc::delay_ms(1);
-//
-//		gpioBus.writeData(0);
-//
-//		xpcc::delay_ms(1);
-//
-//	}
+	LedOrange::setOutput(xpcc::gpio::HIGH);
+	LedGreen::setOutput(xpcc::gpio::LOW);
 	
-	uint16_t data1 = 0xCDCD;
-
+	Button::setInput(PULLDOWN);
+	
 	initDisplay();
-
-//	gpioBus.writeRegister(0x0000, 0x0001);
-//	xpcc::delay_ms(20);
-
-//
-//	while(1) {
-//
-//
-//		//tft.writeIndex(0x0000);
-//
-//		//tft.writeData(0x9321);
-//
-//
-//
-//		//data1 = gpioBus.readRegister(0x0000);
-//
-//		data1 = gpioBus.statusRead();
-//
-//		uart::write(data1 >> 8);
-//		uart::write(data1 & 0x00FF);
-//
-//		xpcc::delay_ms(200);
-//
-//	}
-
-
-<<<<<<< HEAD
+	initTouchscreen();
+	
+	calibrateTouchscreen(tft);
+	
 	tft.setColor(xpcc::glcd::Color::lime());
-	tft.setBackgroundColor(xpcc::glcd::Color::black());
-=======
-//	tft.setColor(xpcc::glcd::Color::black());
-//	tft.setBackgroundColor(xpcc::glcd::Color::lime());
->>>>>>> hy32tft
-//	tft.clear();
-
-
-	xpcc::glcd::Point center(120, 120);
-
-
-
-
-	uint16_t data = 0;
-<<<<<<< HEAD
-	uint16_t x, y;
-	bool dir = true;
-
-	if(tft.setWindow(0, 100, 0, 100)) {
-		uart::write('y');
-	} else {
-		uart::write('n');
-	}
-
-	tft.resetWindow();
-
-=======
-	uint16_t x = center.getX();
-	bool dir = true;
->>>>>>> hy32tft
+	
 	while (1)
 	{
-
-		xpcc::delay_ms(20);
-
-		//tft.clear();
-
-//		if(data) {
-//			tft.setBackgroundColor(xpcc::glcd::Color::red());
-//			data = 0;
-//		} else {
-//			tft.setBackgroundColor(xpcc::glcd::Color::blue());
-//			data = 1;
-//		}
-
-<<<<<<< HEAD
-		x = center.getX();
-		y = center.getY();
-
-		//tft.setColor(xpcc::glcd::Color::lime());
-		tft.clearArea(x-15, x+15, y-15, y+15);
-
-
-
-=======
-
-		drawCross(tft, center);
-
-		x = center.getX();
->>>>>>> hy32tft
-
-		if(x == MAX_X)
-			dir = false;
-
-		if(x == 0)
-			dir = true;
-
-		if(dir) {
-			x++;
-		} else {
-			x--;
+		xpcc::glcd::Point raw;
+		if (ads7843.read(&raw)) {
+			xpcc::glcd::Point point;
+			
+			touchscreen.translate(&raw, &point);
+			drawPoint(tft, point);
+			
+			LedGreen::set();
 		}
-		center.setX(x);
-
-<<<<<<< HEAD
-		tft.resetWindow();
-		drawCross(tft, center);
-
-=======
->>>>>>> hy32tft
-//		tft.update();
-
+		else {
+			LedGreen::reset();
+		}
+		
+		// clear screen if the user button is pressed
+		if (Button::read()) {
+			tft.clear();
+		}
 	}
 
 	return 0;

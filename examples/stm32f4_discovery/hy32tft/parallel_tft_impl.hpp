@@ -33,13 +33,8 @@
 #endif
 
 //#define DISP_ORIENTATION					0
-<<<<<<< HEAD
-//#define DISP_ORIENTATION					90
-#define DISP_ORIENTATION					180
-=======
 #define DISP_ORIENTATION					90
 //#define DISP_ORIENTATION					180
->>>>>>> hy32tft
 //#define DISP_ORIENTATION					270
 
 /* Private define ------------------------------------------------------------*/
@@ -69,10 +64,6 @@ xpcc::ParallelTft<INTERFACE>::initialize()
 	// Read LCD ID
 	//uint16_t code = interface.readRegister(0x0000);
 	
-<<<<<<< HEAD
-
-=======
->>>>>>> hy32tft
 	// TODO
 	deviceCode = Device::SSD1289;
 	
@@ -101,15 +92,9 @@ xpcc::ParallelTft<INTERFACE>::initialize()
 	interface.writeRegister(0x0049, 0x013F);
 	interface.writeRegister(0x004A, 0x0000);
 	interface.writeRegister(0x004B, 0x0000);
-<<<<<<< HEAD
-	interface.writeRegister(0x0044, 0xEF00);	// SSD1289 != ILI9320
-	interface.writeRegister(0x0045, 0x0000);	// SSD1289 != ILI9320
-	interface.writeRegister(0x0046, 0x013F);	// SSD1289 != ILI9320
-=======
 	interface.writeRegister(0x0044, 0xEF00);
 	interface.writeRegister(0x0045, 0x0000);
 	interface.writeRegister(0x0046, 0x013F);
->>>>>>> hy32tft
 	interface.writeRegister(0x0030, 0x0707);
 	interface.writeRegister(0x0031, 0x0204);
 	interface.writeRegister(0x0032, 0x0204);
@@ -159,78 +144,10 @@ xpcc::ParallelTft<INTERFACE>::clear()
 	{
 		interface.writeData(backgroundColor.getValue());
 	}
-<<<<<<< HEAD
-
-	resetWindow();
-}
-
-
-template <typename INTERFACE>
-bool
-xpcc::ParallelTft<INTERFACE>::setWindow(uint16_t x1, uint16_t x2, uint16_t y1, uint16_t y2)
-{
-	if(x1 >= x2 || y1 >= y2 ||
-	   x1 < 0 || y1 < 0 ||
-	   x2 >= MAX_X || y2 >= MAX_Y) {
-		return false;
-	}
-
-	interface.writeRegister(0x0044, (x2 << 8) | x1);
-	interface.writeRegister(0x0045, y1);
-	interface.writeRegister(0x0046, y2);
-	interface.writeRegister(0x004e, x1);
-	interface.writeRegister(0x004f, y1);
-
-
-
-	return true;
-
-=======
->>>>>>> hy32tft
 }
 
 template <typename INTERFACE>
 void
-<<<<<<< HEAD
-xpcc::ParallelTft<INTERFACE>::resetWindow()
-{
-	setWindow(0, 239, 0, 319);
-}
-
-
-template <typename INTERFACE>
-void
-xpcc::ParallelTft<INTERFACE>::clearArea(uint16_t x1, uint16_t x2, uint16_t y1, uint16_t y2)
-{
-	if(x1 < 0)
-		x1=0;
-	if(x2 > MAX_X)
-		x2=MAX_X;
-	if(y1 < 0)
-		y1=0;
-	if(y2>MAX_Y)
-		y2=MAX_Y;
-
-	if(!setWindow(x1, x2, y1, y2)) {
-		return;
-	}
-
-	//writeCursor(x1, y1);
-
-	interface.writeIndex(0x0022);
-	for (uint32_t i = 0; i < ((x2-x1+1) * (y2-y1+1)); i++)
-	{
-		interface.writeData(backgroundColor.getValue());
-	}
-
-	resetWindow();
-}
-
-
-template <typename INTERFACE>
-void
-=======
->>>>>>> hy32tft
 xpcc::ParallelTft<INTERFACE>::setPixel(int16_t x, int16_t y)
 {
 	if (x >= MAX_X || y >= MAX_Y) {
@@ -271,10 +188,6 @@ template <typename INTERFACE>
 void
 xpcc::ParallelTft<INTERFACE>::writeCursor(uint16_t x, uint16_t y)
 {
-<<<<<<< HEAD
-/*
-=======
->>>>>>> hy32tft
 #if  ( DISP_ORIENTATION == 90 ) || ( DISP_ORIENTATION == 270 )
 
 	uint16_t temp;
@@ -288,11 +201,7 @@ xpcc::ParallelTft<INTERFACE>::writeCursor(uint16_t x, uint16_t y)
 	y = ( MAX_Y - 1 ) - y;
 
 #endif
-<<<<<<< HEAD
-*/
-=======
 	
->>>>>>> hy32tft
 	switch (deviceCode)
 	{
 	default:

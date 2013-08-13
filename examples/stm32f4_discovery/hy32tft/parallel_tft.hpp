@@ -37,6 +37,148 @@
 
 namespace xpcc
 {
+
+	/**
+	 *
+	 * @author	Daniel Krebs
+	 */
+	template <typename Port, typename Reset, typename Cs, typename Wr, typename Rd, typename Rs>
+	struct TftGpio
+	{
+		ALWAYS_INLINE void
+		writeIndex(uint16_t index)
+		{
+			Cs::reset();
+			Rd::set();
+
+			Port::write(index);
+
+			Rs::reset();
+
+			// t_AS: min. 10ns
+			xpcc::delay_us(0.05);
+
+			Wr::reset();
+
+			// PW_LW: min. 50ns, max. 500ns
+			xpcc::delay_us(0.1);
+
+			Wr::set();
+
+			// t_AH: min. 5ns
+			xpcc::delay_us(0.05);
+
+			Rs::set();
+			Cs::set();
+		}
+
+		ALWAYS_INLINE void
+		writeData(uint16_t data)
+		{
+			Cs::reset();
+			Rd::set();
+			Rs::set();
+			Port::write(data);
+
+			// t_AS: min. 10ns
+			xpcc::delay_us(0.05);
+
+			Wr::reset();
+
+			// PW_LW: min. 50ns, max. 500ns
+			xpcc::delay_us(0.1);
+
+			Wr::set();
+
+			// t_AH: min. 5ns
+			xpcc::delay_us(0.05);
+
+			Cs::set();
+		}
+
+		ALWAYS_INLINE uint16_t
+		statusRead()
+		{
+			uint16_t data;
+
+			Port::setInput();
+			Cs::reset();
+			Wr::set();
+			Rs::set();
+
+			// t_AS: min. 10ns
+			xpcc::delay_us(0.05);
+
+			Rs::reset();
+
+			// PW_LW: min. 50ns, max. 500ns
+			xpcc::delay_us(0.1);
+
+			Rd::reset();
+
+			// t_AH: min. 5ns
+			xpcc::delay_us(0.05);
+
+			data = Port::read();
+
+			Rd::set();
+			Rs::set();
+			Cs::set();
+
+			Port::setOutput();
+
+			return data;
+		}
+
+		ALWAYS_INLINE uint16_t
+		readData()
+		{
+			uint16_t data;
+
+			Port::setInput();
+			Wr::set();
+			Cs::reset();
+
+			// t_AS: min. 10ns
+			xpcc::delay_us(0.05);
+
+			Rs::set();
+
+			// PW_LW: min. 50ns, max. 500ns
+			xpcc::delay_us(0.1);
+
+			Rd::reset();
+
+			// t_AH: min. 5ns
+			xpcc::delay_us(0.05);
+
+			data = Port::read();
+
+			Rd::set();
+			Cs::set();
+
+			Port::setOutput();
+
+			return data;
+		}
+
+		ALWAYS_INLINE void
+		writeRegister(uint16_t reg, uint16_t value)
+		{
+			writeIndex(reg);
+			writeData(value);
+		}
+
+		ALWAYS_INLINE uint16_t
+		readRegister(uint16_t reg)
+		{
+			writeIndex(reg);
+			return readData();
+		}
+	};
+
+
+
 	/**
 	 * 
 	 * @author	Fabian Greif
@@ -86,203 +228,6 @@ namespace xpcc
 		volatile uint16_t * const ptrData;
 	};
 	
-
-	template <typename Port, typename Reset, typename Cs, typename Wr, typename Rd, typename Rs>
-
-		struct TftGpio
-		{
-
-			ALWAYS_INLINE void
-			writeIndex(uint16_t index)
-			{
-
-				Cs::reset();
-				Rd::set();
-
-
-				Port::write(index);
-
-				Rs::reset();
-
-				// t_AS: min. 10ns
-<<<<<<< HEAD
-				xpcc::delay_us(0.05);
-=======
-				//xpcc::delay_us(0.05);
->>>>>>> hy32tft
-
-				Wr::reset();
-
-				// PW_LW: min. 50ns, max. 500ns
-<<<<<<< HEAD
-				xpcc::delay_us(0.1);
-=======
-				//xpcc::delay_us(0.1);
->>>>>>> hy32tft
-				asm volatile ("nop");
-//				asm volatile ("nop");
-//				asm volatile ("nop");
-//				asm volatile ("nop");
-//				asm volatile ("nop");
-//				asm volatile ("nop");
-//				asm volatile ("nop");
-//				asm volatile ("nop");
-//				asm volatile ("nop");
-
-				Wr::set();
-
-				// t_AH: min. 5ns
-<<<<<<< HEAD
-				xpcc::delay_us(0.05);
-=======
-				//xpcc::delay_us(0.05);
->>>>>>> hy32tft
-				asm volatile ("nop");
-
-
-				Rs::set();
-				Cs::set();
-
-			}
-
-			ALWAYS_INLINE void
-			writeData(uint16_t data)
-			{
-
-				Cs::reset();
-				Rd::set();
-				Rs::set();
-
-				Port::write(data);
-
-				// t_AS: min. 10ns
-<<<<<<< HEAD
-				xpcc::delay_us(0.05);
-=======
-				//xpcc::delay_us(0.05);
->>>>>>> hy32tft
-				asm volatile ("nop");
-
-
-				Wr::reset();
-
-				// PW_LW: min. 50ns, max. 500ns
-<<<<<<< HEAD
-				xpcc::delay_us(0.1);
-=======
-				//xpcc::delay_us(0.1);
->>>>>>> hy32tft
-				asm volatile ("nop");
-				asm volatile ("nop");
-//				asm volatile ("nop");
-
-
-				Wr::set();
-
-				// t_AH: min. 5ns
-<<<<<<< HEAD
-				xpcc::delay_us(0.05);
-=======
-				//xpcc::delay_us(0.05);
->>>>>>> hy32tft
-				asm volatile ("nop");
-
-
-				Cs::set();
-
-			}
-
-			ALWAYS_INLINE uint16_t
-			statusRead()
-			{
-
-				uint16_t data;
-
-				Port::setInput();
-
-				Cs::reset();
-				Wr::set();
-				Rs::set();
-
-				// t_AS: min. 10ns
-				xpcc::delay_us(0.05);
-
-				Rs::reset();
-
-				// PW_LW: min. 50ns, max. 500ns
-				xpcc::delay_us(0.1);
-
-				Rd::reset();
-
-				// t_AH: min. 5ns
-				xpcc::delay_us(0.05);
-
-				data = Port::read();
-
-				Rd::set();
-				Rs::set();
-				Cs::set();
-
-				Port::setOutput();
-
-				return data;
-
-			}
-
-			ALWAYS_INLINE uint16_t
-			readData()
-			{
-
-				uint16_t data;
-
-				Port::setInput();
-
-				Wr::set();
-				Rs::set();
-
-				Cs::reset();
-
-
-				xpcc::delay_ms(1);
-
-				Rd::reset();
-
-				xpcc::delay_ms(1);
-
-				data = Port::read();
-
-
-
-				Rd::set();
-
-				Cs::set();
-
-				xpcc::delay_ms(1);
-
-				Port::setOutput();
-
-				return data;
-
-			}
-
-			ALWAYS_INLINE void
-			writeRegister(uint16_t reg, uint16_t value)
-			{
-				writeIndex(reg);
-				writeData(value);
-			}
-
-			ALWAYS_INLINE uint16_t
-			readRegister(uint16_t reg)
-			{
-				writeIndex(reg);
-				return readData();
-			}
-
-
-		};
-
-
 	/**
 	 * TFT display connected to a 16 bit parallel bus
 	 * 
@@ -321,7 +266,7 @@ namespace xpcc
 		{
 		}
 		
-	public:
+	private:
 		enum class Device
 		{
 			ILI9320,	// device code = 0x9320
@@ -340,10 +285,6 @@ namespace xpcc
 			//SSD2119,	// 3.5 LCD, device code = 0x9919
 		};
 		
-<<<<<<< HEAD
-
-=======
->>>>>>> hy32tft
 		virtual void
 		setPixel(int16_t x, int16_t y);
 		
@@ -353,18 +294,6 @@ namespace xpcc
 		virtual bool
 		getPixel(int16_t x, int16_t y);
 		
-<<<<<<< HEAD
-		bool
-		setWindow(uint16_t x1, uint16_t x2, uint16_t y1, uint16_t y2);
-
-		void
-		resetWindow();
-
-		void
-		clearArea(uint16_t x1, uint16_t x2, uint16_t y1, uint16_t y2);
-
-=======
->>>>>>> hy32tft
 		void
 		writeCursor(uint16_t x, uint16_t y);
 		
