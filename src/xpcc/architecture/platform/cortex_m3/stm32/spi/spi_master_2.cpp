@@ -96,10 +96,11 @@ xpcc::stm32::SpiMaster2::initialize(Mode mode, Prescaler prescaler)
 	SPI2->CR2 &= ~(SPI_CR2_TXEIE  | SPI_CR2_RXNEIE  | SPI_CR2_ERRIE);
 	
 	// disable peripheral
-	SPI2->CR1 &= ~SPI_CR1_SPE;
+	SPI2->CR1 &= ~(SPI_CR1_SPE);
 	
 	// set new mode
-	SPI2->CR1 = prescaler | mode | SPI_CR1_MSTR | SPI_CR1_SSM | SPI_CR1_SSI;
+	SPI2->CR1 = prescaler | mode | SPI_CR1_MSTR | SPI_CR1_LSBFIRST;
+	SPI2->CR2 |= SPI_CR2_SSOE;
 	    
 	// reenable peripheral
 	SPI2->CR1 |= SPI_CR1_SPE;

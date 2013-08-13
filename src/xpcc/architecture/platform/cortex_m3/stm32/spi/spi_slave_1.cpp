@@ -110,23 +110,28 @@ xpcc::stm32::SpiSlave1::initialize(Mode mode, DataSize datasize)
 	RCC->APB2RSTR &= ~RCC_APB2RSTR_SPI1RST;
 	
 	// disable all interrupts
-	SPI1->CR2 &= ~(SPI_CR2_TXEIE  | SPI_CR2_RXNEIE  | SPI_CR2_ERRIE);
+	//SPI1->CR2 = ~(SPI_CR2_TXEIE  | SPI_CR2_RXNEIE  | SPI_CR2_ERRIE);
 	
 	// disable peripheral
 	SPI1->CR1 &= ~SPI_CR1_SPE;
 	
+	// enable interrupts
+	SPI1->CR2 = SPI_CR2_RXNEIE; // | SPI_CR2_TXEIE;
+			
 	// slave mode: CR1_MSTR = '0'
 	// NSS not fixed: CR1_SSM = '0'
 	// Motorola Mode: CR2_FRF = '0'
 	
 	// set data size
-	SPI1->CR1 |= datasize;
+	SPI1->CR1 = datasize | mode | SPI_CR1_LSBFIRST;
 	
-	// set slave mode with NSS not fixed
-	SPI1->CR1 = mode;
+	// set clock polarity and phase
+	//SPI1->CR1 |= mode;
 		
 	// reenable peripheral
 	SPI1->CR1 |= SPI_CR1_SPE;
+	
+	SPI1->DR = 0;
 }
 	
 // ----------------------------------------------------------------------------
@@ -143,6 +148,21 @@ uint16_t
 xpcc::stm32::SpiSlave1::read() 
 {
 	return SPI1->DR;
+}
+
+// ----------------------------------------------------------------------------
+
+bool
+xpcc::stm32::SpiSlave1::rxBufferNotEmpty() 
+{
+	
+	return SPI1->SR & SPI_SR_RXNE;
+//	
+//	if(SPI1->SR & SPI_SR_RXNE) {
+//		return true;
+//	} else {
+//		return false;
+//	}
 }
 
 // ----------------------------------------------------------------------------

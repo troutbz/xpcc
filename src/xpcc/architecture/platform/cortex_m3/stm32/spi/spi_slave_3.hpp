@@ -110,6 +110,8 @@ namespace xpcc
 			static uint16_t
 			read();
 			
+			static bool
+			rxBufferNotEmpty();
 			
 			static void
 			enableInterruptVector(bool enable, uint32_t priority);

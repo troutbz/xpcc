@@ -118,23 +118,28 @@ xpcc::stm32::SpiSlave3::initialize(Mode mode, DataSize datasize)
 	RCC->APB1RSTR &= ~RCC_APB1RSTR_SPI3RST;
 	
 	// disable all interrupts
-	SPI3->CR2 &= ~(SPI_CR2_TXEIE  | SPI_CR2_RXNEIE  | SPI_CR2_ERRIE);
+	//SPI3->CR2 = ~(SPI_CR2_TXEIE  | SPI_CR2_RXNEIE  | SPI_CR2_ERRIE);
 	
 	// disable peripheral
 	SPI3->CR1 &= ~SPI_CR1_SPE;
 	
+	// enable interrupts
+	SPI3->CR2 = SPI_CR2_RXNEIE; // | SPI_CR2_TXEIE;
+			
 	// slave mode: CR1_MSTR = '0'
 	// NSS not fixed: CR1_SSM = '0'
 	// Motorola Mode: CR2_FRF = '0'
 	
 	// set data size
-	SPI3->CR1 |= datasize;
+	SPI3->CR1 = datasize | mode | SPI_CR1_LSBFIRST;
 	
-	// set slave mode with NSS not fixed
-	SPI3->CR1 = mode;
+	// set clock polarity and phase
+	//SPI3->CR1 |= mode;
 		
 	// reenable peripheral
 	SPI3->CR1 |= SPI_CR1_SPE;
+	
+	SPI3->DR = 0;
 }
 	
 // ----------------------------------------------------------------------------
@@ -154,19 +159,34 @@ xpcc::stm32::SpiSlave3::read()
 }
 
 // ----------------------------------------------------------------------------
+
+bool
+xpcc::stm32::SpiSlave3::rxBufferNotEmpty() 
+{
+	
+	return SPI3->SR & SPI_SR_RXNE;
+//	
+//	if(SPI3->SR & SPI_SR_RXNE) {
+//		return true;
+//	} else {
+//		return false;
+//	}
+}
+
+// ----------------------------------------------------------------------------
 void
 xpcc::stm32::SpiSlave3::enableInterruptVector(bool enable,
 uint32_t priority)
 {
 	if (enable) {
 		// Set priority for the interrupt vector
-		NVIC_SetPriority(SPI1_IRQn, priority);
+		NVIC_SetPriority(SPI3_IRQn, priority);
 		
 		// register IRQ at the NVIC
-		NVIC_EnableIRQ(SPI1_IRQn);
+		NVIC_EnableIRQ(SPI3_IRQn);
 	}
 	else {
-		NVIC_DisableIRQ(SPI1_IRQn);
+		NVIC_DisableIRQ(SPI3_IRQn);
 	}
 }
 

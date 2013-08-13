@@ -43,7 +43,7 @@ namespace
 	GPIO__INPUT(MisoA6, A, 6);
 	GPIO__OUTPUT(MosiA7, A, 7);
 	
-	GPIO__INPUT(NssA15, A, 15);
+	GPIO__IO(NssA15, A, 15);
 	GPIO__INPUT(SckB3, B, 3);
 	GPIO__INPUT(MisoB4, B, 4);
 	GPIO__OUTPUT(MosiB5, B, 5);
@@ -79,7 +79,7 @@ xpcc::stm32::SpiMaster1::configurePins(Mapping mapping)
 		MosiA7::setAlternateFunction(AF_SPI1, xpcc::stm32::PUSH_PULL);
 	}
 	else {
-		NssA15::setAlternateFunction(AF_SPI1);
+		NssA15::setAlternateFunction(AF_SPI1, xpcc::stm32::PUSH_PULL);
 		SckB3::setAlternateFunction(AF_SPI1);
 		MisoB4::setAlternateFunction(AF_SPI1);
 		MosiB5::setAlternateFunction(AF_SPI1, xpcc::stm32::PUSH_PULL);
@@ -113,10 +113,11 @@ xpcc::stm32::SpiMaster1::initialize(Mode mode, Prescaler prescaler)
 	SPI1->CR2 &= ~(SPI_CR2_TXEIE  | SPI_CR2_RXNEIE  | SPI_CR2_ERRIE);
 	
 	// disable peripheral
-	SPI1->CR1 &= ~SPI_CR1_SPE;
+	SPI1->CR1 &= ~(SPI_CR1_SPE);
 	
 	// set new mode
-	SPI1->CR1 = prescaler | mode | SPI_CR1_MSTR | SPI_CR1_SSM | SPI_CR1_SSI;
+	SPI1->CR1 = prescaler | mode | SPI_CR1_MSTR | SPI_CR1_LSBFIRST;
+	SPI1->CR2 |= SPI_CR2_SSOE;
 	    
 	// reenable peripheral
 	SPI1->CR1 |= SPI_CR1_SPE;
