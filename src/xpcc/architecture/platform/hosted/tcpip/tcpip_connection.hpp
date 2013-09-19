@@ -29,34 +29,47 @@
 #ifndef XPCC_TCPIP__CONNECTION_HPP
 #define XPCC_TCPIP__CONNECTION_HPP
 
-/*
- *
- *
- */
+#include <boost/asio.hpp>
+#include <boost/bind.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/enable_shared_from_this.hpp>
 
 namespace xpcc{
 namespace tcpip{
+
+	/**
+	 * \brief a receiving connection of the server
+ 	 *
+ 	 *  \author Thorsten Lajewski
+ 	 */
+
     class Connection: public boost::enable_shared_from_this<xpcc::tcpip::Connection> {
 
+
+
     public:
+
+    	  Connection(boost::shared_ptr<boost::asio::io_service> ioService);
+
+    	  void start();
+
+    	  boost::asio::ip::tcp::socket& getSocket();
+
+    	  void receiveMessage();
+
+    	  void readHeader();
+
+    	  void readBody();
+
     	  typedef boost::shared_ptr<Connection> ConnectionPtr;
-
-    	  static ConnectionPtr create(boost::asio::io_service& io_service);
-
-    	  inline boost::asio::ip::tcp::socket& socket()
-    	  {
-    	    return socket;
-    	  }
 
 
     private:
 
-
-
-    	  Connection(boost::shared_ptr<boost::asio::io_service> ioService);
+    	  boost::asio::ip::tcp::socket socket;
 
     };
-
+}}
 #endif
 
 

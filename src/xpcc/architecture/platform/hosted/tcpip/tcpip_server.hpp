@@ -34,6 +34,9 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 
+#include <list>
+
+#include "tcpip_connection.hpp"
 
 namespace xpcc
 {
@@ -55,21 +58,25 @@ namespace xpcc
 
 			//~Server();
 
-			void receive();
+			void spawnReceiveConnection();
 
 			void  distribute();
 
 			void update();
 
+
+
 		private:
 
-			void accept_handler(const boost::system::error_code& error);
+			void accept_handler(boost::shared_ptr<xpcc::tcpip::Connection> receive,
+					const boost::system::error_code& error);
 
 			boost::shared_ptr<boost::asio::io_service> ioService;
 			boost::shared_ptr< boost::asio::io_service::work > work;
 			boost::asio::ip::tcp::endpoint endpoint;
-			boost::asio::ip::tcp::socket receiveSocket;
 			boost::asio::ip::tcp::acceptor acceptor;
+
+			std::list<boost::shared_ptr<xpcc::tcpip::Connection> > receiveConnections;
 
 		};
 	}
