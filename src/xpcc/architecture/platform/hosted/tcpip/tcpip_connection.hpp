@@ -33,6 +33,7 @@
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
+#include "tcpip_message.hpp"
 
 namespace xpcc{
 namespace tcpip{
@@ -57,16 +58,21 @@ namespace tcpip{
 
     	  void receiveMessage();
 
-    	  void readHeader();
-
-    	  void readBody();
 
     	  typedef boost::shared_ptr<Connection> ConnectionPtr;
 
 
     private:
 
+    	  void handleReadHeader(const boost::system::error_code& error);
+
+    	  void handleReadBody(const boost::system::error_code& error);
+
     	  boost::asio::ip::tcp::socket socket;
+
+    	  //storage for current received message
+    	  char header[xpcc::tcpip::TCPHeader::HSIZE];
+    	  char message[xpcc::tcpip::Message::MSIZE];
 
     };
 }}

@@ -3,8 +3,7 @@
 #include <iostream>
 
 xpcc::tcpip::Client::Client(std::string ip):
-	ioService(new boost::asio::io_service()),
-	work(new boost::asio::io_service::work(*ioService))
+	ioService(new boost::asio::io_service())
 {
 	boost::asio::ip::tcp::resolver resolver(*ioService);
 	boost::asio::ip::tcp::resolver::query query(ip, "32003");
@@ -27,6 +26,10 @@ xpcc::tcpip::Client::addComponent(uint8_t id)
 {
 	boost::shared_ptr<ComponentInfo> newComponent = boost::shared_ptr<ComponentInfo>(new ComponentInfo(id));
 	this->componentMap.insert(std::make_pair (id,newComponent));
+	boost::shared_ptr<xpcc::tcpip::Message> msg(new xpcc::tcpip::Message(id));
+	std::cout<<"add Component"<<std::endl;
+	this->sendPacket(msg);
+
 }
 
 void
@@ -49,5 +52,44 @@ xpcc::tcpip::Client::sendAlivePing(int identifier)
 void
 xpcc::tcpip::Client::connect_handler(const boost::system::error_code& error)
 {
-	std::cout << "Connected with: "<< error <<std::endl;
+	std::cout << "Connected with error-code: "<< error <<std::endl;
+}
+
+//send a xpcc packet to the server
+void
+xpcc::tcpip::Client::sendPacket(boost::shared_ptr<xpcc::tcpip::Message> msg)
+{
+	writingMessages = !messagesToBeSent.empty();
+	messagesToBeSent.push_back(msg);
+    if (!writingMessages)
+    {
+      std::cout<<"Sending: "<<messagesToBeSent.front()->getMessageLength() <<std::endl;
+      messagesToBeSent.front()->encodeMessage();
+      boost::asio::async_write(*sendSocket,
+          boost::asio::buffer(messagesToBeSent.front()->getEncodedMessage(),
+          messagesToBeSent.front()->getMessageLength()),
+          boost::bind(&xpcc::tcpip::Client::writeHandler, this,
+            boost::asio::placeholders::error));
+    }
+}
+
+void
+xpcc::tcpip::Client::writeHandler(const boost::system::error_code& error)
+{
+	std::cout<<"send Complete"<<std::endl;
+    if (!error)
+    {
+    	//Remove sent message
+    	messagesToBeSent.pop_front();
+    	if (!messagesToBeSent.empty())
+    	{
+    		//Prepare next message
+    		messagesToBeSent.front()->encodeMessage();
+    		boost::asio::async_write(*sendSocket,
+    		        boost::asio::buffer(messagesToBeSent.front()->getEncodedMessage(),
+    		        messagesToBeSent.front()->getMessageLength()),
+    				boost::bind(&xpcc::tcpip::Client::writeHandler, this,
+    				boost::asio::placeholders::error));
+      }
+    }
 }

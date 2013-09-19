@@ -72,7 +72,6 @@ namespace xpcc
 					const boost::system::error_code& error);
 
 			boost::shared_ptr<boost::asio::io_service> ioService;
-			boost::shared_ptr< boost::asio::io_service::work > work;
 			boost::asio::ip::tcp::endpoint endpoint;
 			boost::asio::ip::tcp::acceptor acceptor;
 

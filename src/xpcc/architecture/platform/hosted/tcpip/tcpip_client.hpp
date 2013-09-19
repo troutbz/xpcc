@@ -79,7 +79,7 @@ namespace xpcc
 			void sendAlivePing(int identifier);
 
 			//send a xpcc packet to the server
-			void sendPacket(const xpcc::tcpip::Message &msg);
+			void sendPacket(boost::shared_ptr<xpcc::tcpip::Message> msg);
 
 			//get a pointer to the last message in the receivedMessages list
 			boost::shared_ptr<xpcc::tcpip::Message> getMessage();
@@ -100,6 +100,8 @@ namespace xpcc
 			void receive_header_handler(const boost::system::error_code& error);
 
 			void receive_data_handler(const boost::system::error_code& error);
+
+			void writeHandler(const boost::system::error_code& error);
 
 			void close();
 
@@ -123,7 +125,6 @@ namespace xpcc
 			bool closeConnection;
 
 			boost::shared_ptr< boost::asio::io_service >  ioService;
-			boost::shared_ptr< boost::asio::io_service::work > work;
 
 			//send connection to the server
 			boost::asio::ip::tcp::resolver::iterator endpointIter;
