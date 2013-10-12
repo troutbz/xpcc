@@ -51,17 +51,6 @@ struct Spi
 		SoftwareReset	///< The master is initializing itself
 	};
 
-	/// transfer options for the receive and transmit buffers
-	/// @see SpiBlockMaster
-	enum class
-	BufferOptions : uint8_t
-	{
-		TxRxIncrement = 0b11,           ///< Increments both Tx and Rx buffer
-		TxIncrementRxDecrement = 0b10,  ///< Increments Tx, but decrements Rx buffer
-		TxDecrementRxIncrement = 0b01,  ///< Decrements Tx, but increments Rx buffer
-		TxRxDecrement = 0b00,           ///< Decrements both Tx and Rx buffer
-	};
-
 	/// Operations after a transmission.
 	enum class
 	Operation
@@ -78,23 +67,25 @@ struct Spi
  * Use this interface if you need the *fastest possible* data transfer and only
  * have one slave on the bus or implement the resource management yourself.
  *
- * @warning	You can only either use the `SimpleSpi` or `SpiMaster` driver on
+ * @warning	You can only either use the `SpiSimpleMaster` or `SpiMaster` driver on
  * 			the same hardware at the same time.
  *
  * @author	Niklas Hauser
  * @ingroup	spi
  */
-class SimpleSpi : public ::xpcc::Peripheral, public Spi
+class SpiSimpleMaster : public ::xpcc::Peripheral, public Spi
 {
 #ifdef __DOXYGEN__
 public:
 	/**
 	 * Initializes the hardware and sets the baudrate.
 	 *
+	 * @tparam	clockSource
+	 * 		the targets sytem clock
 	 * @tparam	baudrate
 	 * 		the desired baudrate in Hz
 	 */
-	template< uint32_t baudrate >
+	template< class clockSource, uint32_t baudrate >
 	static void
 	initialize();
 
@@ -106,7 +97,7 @@ public:
 	static void
 	setDataOrder(DataOrder order);
 
-	// synchronous
+	// blocking
 	/**
 	 * Write a single byte, wait for completion.
 	 *
@@ -119,7 +110,7 @@ public:
 	static void
 	writeBlocking(uint8_t data);
 
-	// asynchronous
+	// non-blocking
 	/**
 	 * Write a single byte, and return immediately.
 	 *
@@ -128,9 +119,16 @@ public:
 	static bool
 	write(uint8_t data);
 
-	/// @return	last byte that has been received.
-	static uint8_t
-	getResult();
+	/**
+	 * Get the last byte that was received.
+	 *
+	 * @param[out]	data
+	 *		Byte read, if any
+	 *
+	 * @return	`true` if receive buffer is valid, `false` if not
+	 */
+	static bool
+	getResult(uint8_t &data);
 
     /**
      * Set the data buffers and length with options and starts a transfer.
@@ -142,14 +140,12 @@ public:
      *      pointer to receive buffer, set to `0` to discard received bytes
      * @param       length
      *      number of bytes to be shifted out
-     * @param       options
-     *      buffer options, @see BufferOptions
      *
      * @return  `true`  if transfer request was successfully serviced,
      *          `false` if another transfer is already progress.
      */
     static bool
-    transfer(uint8_t * tx, uint8_t * rx, std::size_t length, BufferOptions options=BufferOptions::TxRxIncrement);
+    transfer(uint8_t * tx, uint8_t * rx, std::size_t length);
 
 	/// @return	`true` if last byte has been sent and the swapped byte can be read.
 	static bool
@@ -249,8 +245,7 @@ public:
 	struct Transmission {
 		const uint8_t *writeBuffer;	///< data to write, set to `0` to transmit dummy bytes
 		uint8_t *readBuffer;		///< data to read, set `0` to discard received bytes
-		std::size_t size;			///< number of bytes to be transmitted
-		BufferOptions options;		///< buffer options, @see BufferOptions
+		std::size_t length;			///< number of bytes to be transmitted
 		Operation next;				///< operation following the transmission
 	};
 

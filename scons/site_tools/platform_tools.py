@@ -87,10 +87,12 @@ def platform_tools_find_device_file(env):
 	elif id.platform == 'stm32':
 		for file in os.listdir(xml_path):
 			if 'stm32'+id.family in file:
-				fileArray = file.replace('stm32'+id.family[0],'').replace('.xml','').split("-")
-				names = fileArray[0].split("_")
-				pins = fileArray[1].split("_")
-				sizes = fileArray[2].split("_")
+				fileArray = file.replace('stm32'+id.family[0],'').replace('.xml','').split('-')
+				if len(fileArray) < 3:
+					continue
+				names = fileArray[0].split('_')
+				pins = fileArray[1].split('_')
+				sizes = fileArray[2].split('_')
 				if id.name in names and id.pin_id in pins and id.size_id in sizes:
 					device_file = os.path.join(xml_path, file)
 					break
@@ -333,6 +335,9 @@ def generate(env, **kw):
 	def test_cortex_m4(target):
 		return test_core(target, 'cortex-m4', True)
 	env.AddTemplateJinja2Test('cortex_m4', test_cortex_m4)
+	def test_cortex_m4f(target):
+		return test_core(target, 'cortex-m4f')
+	env.AddTemplateJinja2Test('cortex_m4f', test_cortex_m4f)
 
 	# Platform Tests
 	def test_is_stm32(target):

@@ -77,6 +77,8 @@ class STMDeviceReader(XMLDeviceReader):
 		propertyGroup = XMLDeviceReader(os.path.join(os.path.dirname(file), 'propertyGroups.xml'), self.log)
 		architecture = propertyGroup.query("//groupEntry[@name='%s']/property[@name='arm_architecture']" % name)[0].get('value').lower()
 		core = propertyGroup.query("//groupEntry[@name='%s']/property[@name='arm_core_type']" % name)[0].get('value').lower()
+		if len(propertyGroup.query("//groupEntry[@name='%s']/property[@name='arm_fpu_type']" % name)) > 0:
+			core += 'f'
 		defines = propertyGroup.query("//groupEntry[@name='%s']/cdefine" % name)
 		for define in defines:
 			cdef = define.get('name')
@@ -105,15 +107,21 @@ class STMDeviceReader(XMLDeviceReader):
 		self.properties['peripherals'] = peripherals = []
 		self.properties['modules'] = modules = []
 
-		self.modules = self.query("//IP/@InstanceName")
+		self.modules = memoryFile.query("//RegisterGroup/@name")
 		self.log.debug("Available Modules are:\n" + self._modulesToString())
 		package = self.query("/Mcu/@Package")[0]
 		self.properties['pin-count'] = re.findall('[0-9]+', package)[0]
 		self.properties['package']   = re.findall('[A-Za-z\.]+', package)[0]
 		
 		for m in self.modules:
-			if any(m.startswith(per) for per in ['TIM', 'UART', 'USART', 'ADC', 'DAC', 'CAN', 'SPI', 'I2C']):
-				modules.append(m)
+			if any(m.startswith(per) for per in ['TIM', 'UART', 'USART', 'ADC', 'DAC', 'CAN', 'SPI', 'I2C', 'OTG', 'USB']):
+				if m.startswith('ADC') and '_' in m:
+					for a in m.replace('ADC','').split('_'):
+						modules.append('ADC'+a)
+				elif m.startswith('USB') or m.startswith('OTG_FS'):
+					modules.append('USB')
+				else:
+					modules.append(m)
 		
 		invertMode = {'out': 'in', 'in': 'out', 'io': 'io'}
 		nameToMode = {'rx': 'in', 'tx': 'out', 'cts': 'in', 'rts': 'out', 'ck': 'out',	# Uart
@@ -172,6 +180,16 @@ class STMDeviceReader(XMLDeviceReader):
 					if af_id:
 						af.update({'id': af_id})
 					gpio_afs.append(af)
+					
+					mapName = {'rx': 'miso', 'tx': 'mosi', 'ck': 'sck'}
+					if signal.startswith('USART') and name in mapName:
+						af = {'peripheral' : 'UartSpiMaster' + instance,
+							  'name': mapName[name].capitalize()}
+						if mode:
+							af.update({'type': mode})
+						if af_id:
+							af.update({'id': af_id})
+						gpio_afs.append(af)
 				
 				elif signal.startswith('SPI'):
 					af = {'peripheral' : 'SpiMaster' + instance,
@@ -238,6 +256,24 @@ class STMDeviceReader(XMLDeviceReader):
 							  'type': 'out',
 							  'id': '0'}
 						gpio_afs.append(af)
+				
+				if signal.startswith('OTG_FS') and raw_names[2] in ['DM', 'DP']:
+					af = {'peripheral' : 'Usb',
+						  'name': raw_names[2].capitalize()}
+					if mode:
+						af.update({'type': mode})
+					if af_id:
+						af.update({'id': af_id})
+					gpio_afs.append(af)
+				
+				if signal.startswith('USB'):
+					af = {'peripheral' : 'Usb',
+						  'name': name.capitalize()}
+					if mode:
+						af.update({'type': mode})
+					if af_id:
+						af.update({'id': af_id})
+					gpio_afs.append(af)
 			
 			# sort after key id and then add all without ids
 			gpio['af'] = [a for a in gpio_afs if 'id' in a]

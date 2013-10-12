@@ -50,7 +50,7 @@ displayMessage(const xpcc::can::Message& message)
 // ----------------------------------------------------------------------------
 MAIN_FUNCTION
 {
-	typedef SystemClock<Pll<ExternalOscillator<MHz8>, MHz168, MHz48> > systemClock;
+	typedef SystemClock<Pll<ExternalCrystal<MHz8>, MHz168, MHz48> > systemClock;
 	systemClock::enable();
 
 	LedOrange::setOutput(xpcc::Gpio::HIGH);
@@ -58,7 +58,7 @@ MAIN_FUNCTION
 	// Initialize Usart
 	GpioOutputA2::connect(Usart2::Tx);
 	GpioInputA3::connect(Usart2::Rx);
-	Usart2::initialize(115200, 10);
+	Usart2::initialize<systemClock, 115200>(10);
 
 	XPCC_LOG_INFO << "CAN Test Program" << xpcc::endl;
 
