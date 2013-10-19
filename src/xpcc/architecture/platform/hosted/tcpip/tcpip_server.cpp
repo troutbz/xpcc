@@ -1,10 +1,11 @@
 #include "tcpip_server.hpp"
 #include <iostream>
 
-xpcc::tcpip::Server::Server():
+xpcc::tcpip::Server::Server(int port):
 	ioService(new boost::asio::io_service()),
-	endpoint(boost::asio::ip::tcp::v4(), 32003),
-	acceptor(*ioService, endpoint)
+	endpoint(boost::asio::ip::tcp::v4(), port),
+	acceptor(*ioService, endpoint),
+	serverPort(port)
 {
 	spawnReceiveConnection();
 	ioService->run();

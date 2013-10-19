@@ -26,61 +26,68 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 // ----------------------------------------------------------------------------
-#ifndef XPCC_TCPIP__SERVER_HPP
-#define XPCC_TCPIP__SERVER_HPP
+#ifndef XPCC_TCPIP__RECEIVER_HPP
+#define XPCC_TCPIP__RECEIVER_HPP
 
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 
-#include <list>
+#include "tcpip_message.hpp"
 
-#include "tcpip_connection.hpp"
+namespace xpcc{
+namespace tcpip{
 
-namespace xpcc
-{
-	namespace tcpip
-	{
+	/**
+	 * \brief receiver for all messages to a component.
+ 	 *
+ 	 *  \author Thorsten Lajewski
+ 	 */
 
-	    /**
-	     *  This class handles the communication between all components via tcp /ip
-	     *  All clients register to on the server. The server keeps track of all alive
-	     *  client processes and distributes all messages according to the xpcc message
-	     *  header.
-	     *
-	     *  \author Thorsten Lajewski
-	     */
-		class Server
-		{
-		public:
-			Server(int port);
+    class Receiver {
+    public:
 
-			//~Server();
+    	Receiver(xpcc::tcpip::Client* parent, int componentId);
 
-			void spawnReceiveConnection();
+    	void run();
 
-			void spawnSendThread(uint8_t componentId);
+    	void readMessage(const xpcc::tcpip::TCPHeader& header);
 
-			void  distribute();
-
-			void update();
+    	//places the first received message in the client message list,
+    	//where it's handled by the postman
+    	// returns true if a message was pushlied
+    	// false if no message is available
+    	//TODO make thread safe
+    	bool publishMessage();
 
 
+    private:
 
-		private:
+    	void readHeader();
 
-			void accept_handler(boost::shared_ptr<xpcc::tcpip::Connection> receive,
-					const boost::system::error_code& error);
+    	void readHeaderHandler(const boost::system::error_code& error);
 
-			boost::shared_ptr<boost::asio::io_service> ioService;
-			boost::asio::ip::tcp::endpoint endpoint;
-			boost::asio::ip::tcp::acceptor acceptor;
+    	void readMessageHandler(const boost::system::error_code& error);
 
-			int serverPort;
-			std::list<boost::shared_ptr<xpcc::tcpip::Connection> > receiveConnections;
+    	xpcc::tcpip::Client* parent;
+    	int componentId;
 
-		};
-	}
-}
-#endif // XPCC_TCPIP__SERVER_HPP
+		boost::asio::ip::tcp::endpoint endpoint;
+		boost::asio::ip::tcp::acceptor acceptor;
+		boost::asio::ip::tcp::socket socket;
+
+
+		//storage for current received message
+		char header[xpcc::tcpip::TCPHeader::HSIZE];
+		char message[xpcc::tcpip::Message::MSIZE];
+
+		//storage for last received messages
+		std::list<boost::shared_ptr<xpcc::tcpip::Message> > receivedMessages;
+
+		bool connected;
+    	bool shutdown;
+
+    };
+}}
+#endif

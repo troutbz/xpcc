@@ -26,8 +26,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 // ----------------------------------------------------------------------------
-#ifndef XPCC_TCPIP__CLIENT_HPP
-#define XPCC_TCPIP__CLIENT_HPP
+#ifndef XPCC_TCPIP__DISTRIBUTOR_HPP
+#define XPCC_TCPIP__DISTRIBUTOR_HPP
 
 //-----------------------------------------------------------------------------
 //boost lib includes
@@ -37,13 +37,10 @@
 #include <boost/shared_ptr.hpp>
 //-----------------------------------------------------------------------------
 //stl lib includes
-#include <list>
 #include <string>
-#include <map>
-
+#include <list>
 //-----------------------------------------------------------------------------
 //xpcc dependencies
-#include <xpcc/workflow/periodic_timer.hpp>
 #include <xpcc/architecture/platform/hosted/tcpip/tcpip_message.hpp>
 
 
@@ -54,96 +51,44 @@ namespace xpcc
 	{
 
 	    /**
-         * The Client sends all actions and events to the Server and receives
-         * all responses.
-         * The client consists of several threads:
-         * One thread is reserved for for the io_service
-         * One thread is used for sending packages to the server
-         * And one thread for receiving data from each component
+		 * For each component registered on the server on Distributor is created,
+		 * this Distrubutor handles sending of messages.
 	     *
 	     *  \author Thorsten Lajewski
 	     */
-		class Client
+		class Distributor
 		{
 		public:
 
-			Client(std::string ip, int port);
+			Distributor(xpcc::tcpip::Server* parent, std::string ip, int port);
 
-			//~Client();
+			void run();
 
-			int getServerPort();
-
-			void connect();
-
-			void addComponent(uint8_t id);
-
-			//the server has to receive ping from each component
-			void sendAlivePing(int identifier);
-
-			//send a xpcc packet to the server
-			void sendPacket(boost::shared_ptr<xpcc::tcpip::Message> msg);
-
-			//get a pointer to the last message in the receivedMessages list
-			boost::shared_ptr<xpcc::tcpip::Message> getMessage();
-
-			void receiveNewMessage(boost::shared_ptr<xpcc::tcpip::Message> message);
-
-			//remove last Message from the receivedMessages list
-			void deleteMessage();
-
-			//timer need to be checked continously
-			void update();
+			//send a xpcc packet to the component
+			void sendMessage(boost::shared_ptr<xpcc::tcpip::Message> msg);
 
 			//close the tcpip connection
 			void disconnect();
 
-			//get pointer to the io_service of the client
-			boost::shared_ptr< boost::asio::io_service >
-			getIOService();
 
 		private:
 
 			void connect_handler(const boost::system::error_code& error);
 
-			void writeHandler(const boost::system::error_code& error);
-
-			void spawnReceiveThread(uint8_t id);
+			void sendHandler(const boost::system::error_code& error);
 
 			void close();
 
-			struct ComponentInfo{
-				ComponentInfo(uint8_t id):
-						identifier(id),
-						timer(200)
-				{
-				}
-
-				uint8_t identifier;
-				xpcc::PeriodicTimer<> timer;
-
-			};
-
 			bool connected;
 			bool writingMessages;
-			bool closeConnection;
 
 			boost::shared_ptr< boost::asio::io_service >  ioService;
 
-			//send connection to the server
-			int serverPort;
+			//send connection to the component
+			int port;
 			boost::asio::ip::tcp::resolver::iterator endpointIter;
 			boost::shared_ptr<boost::asio::ip::tcp::socket> sendSocket;
-			boost::shared_ptr< boost::thread > serviceThread;
-			boost::shared_ptr< boost::thread > sentThread;
 			std::list< boost::shared_ptr<xpcc::tcpip::Message> > messagesToBeSent;
-
-			//one thread and one receiver for each component of the container
-			std::list< boost::shared_ptr< boost::thread > > receiveThreadPool;
-			std::list< boost::shared_ptr< xpcc::tcpip::Receiver> > componentReceiver;
-			std::map< uint8_t, boost::shared_ptr<ComponentInfo> > componentMap;
-
-			//list for available messages
-			std::list< boost::shared_ptr<xpcc::tcpip::Message> > receivedMessages;
 
 		};
 	}

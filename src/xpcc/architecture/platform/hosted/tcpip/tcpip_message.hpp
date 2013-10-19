@@ -55,11 +55,15 @@ namespace xpcc
 			TCPHeader(uint8_t sender);
 
 			//create Data Message
-			TCPHeader(xpcc::Header& header);
+			TCPHeader(xpcc::Header& header, int dataSize);
 
 			static constexpr int headerSize(){
 				return sizeof(Type)+sizeof(xpcc::Header);
 			}
+
+			bool isDataMessage() const;
+
+			int getDataSize() const;
 
 			static constexpr int HSIZE = sizeof(Type)+sizeof(xpcc::Header);
 
@@ -67,10 +71,12 @@ namespace xpcc
 
 			Type getType() const;
 
+
         private:
 
 			Type type;
 			xpcc::Header header;
+			int dataLength;
 
         };
 
@@ -94,8 +100,6 @@ namespace xpcc
 
 			int getMessageLength() const;
 
-			bool isDataMessage() const;
-
 			xpcc::Header& getXpccHeader();
 
 			xpcc::tcpip::TCPHeader& getTCPHeader();
@@ -106,7 +110,6 @@ namespace xpcc
 
 			xpcc::tcpip::TCPHeader  header;
 			SmartPointer data; //contains the message in an encoded form
-			int dataLength;
 
 			//store for complete message in encoded form
 			char dataStorage[SSIZE];

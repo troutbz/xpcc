@@ -2,11 +2,12 @@
 
 #include <iostream>
 
-xpcc::tcpip::Client::Client(std::string ip):
+xpcc::tcpip::Client::Client(std::string ip, int port):
+	serverPort(port),
 	ioService(new boost::asio::io_service())
 {
 	boost::asio::ip::tcp::resolver resolver(*ioService);
-	boost::asio::ip::tcp::resolver::query query(ip, "32003");
+	boost::asio::ip::tcp::resolver::query query(ip, port);
 	this->endpointIter = resolver.resolve(query);
 
 	//this->serviceThread = boost::shared_ptr<boost::thread>(new boost::thread(boost::bind(&boost::asio::io_service::run, ioService)));
@@ -20,6 +21,11 @@ xpcc::tcpip::Client::Client(std::string ip):
 
 }
 
+int
+xpcc::tcpip::Client::getServerPort()
+{
+	return this->serverPort;
+}
 
 void
 xpcc::tcpip::Client::addComponent(uint8_t id)
@@ -28,13 +34,18 @@ xpcc::tcpip::Client::addComponent(uint8_t id)
 	this->componentMap.insert(std::make_pair (id,newComponent));
 	boost::shared_ptr<xpcc::tcpip::Message> msg(new xpcc::tcpip::Message(id));
 	std::cout<<"add Component"<<std::endl;
+	this->spawnReceiveThread(id);
 	this->sendPacket(msg);
 
 }
 
 void
-xpcc::tcpip::Client::registerComponents()
+xpcc::tcpip::Client::spawnReceiveThread(uint8_t id)
 {
+	boost::shared_ptr<xpcc::tcpip::Receiver> receiver(new xpcc::tcpip::Receiver(this, id));
+	this->componentReceiver.push_back(receiver);
+	boost::shared_ptr<boost::thread> receiverThred(
+			new boost::thread(boost::bind(&xpcc::tcpip::Receiver::run, &receiver)));
 }
 
 void
@@ -92,4 +103,18 @@ xpcc::tcpip::Client::writeHandler(const boost::system::error_code& error)
     				boost::asio::placeholders::error));
       }
     }
+}
+
+//TODO make thread safe
+void
+xpcc::tcpip::Client::receiveNewMessage(boost::shared_ptr<xpcc::tcpip::Message> message)
+{
+	this->receivedMessages->push_back(message);
+}
+
+
+boost::shared_ptr< boost::asio::io_service >
+xpcc::tcpip::Client::getIOService()
+{
+	return this->ioService;
 }

@@ -1,14 +1,14 @@
 #include "tcpip_message.hpp"
 
 xpcc::tcpip::TCPHeader::TCPHeader(uint8_t sender):
-		type(Type::REGISTER), header()
+		type(Type::REGISTER), header(), dataLength(0)
 {
 	this->header.source = sender;
 	std::cout<<"Type"<<sizeof(Type)<<std::endl;
 }
 
-xpcc::tcpip::TCPHeader::TCPHeader(xpcc::Header& header):
-		type(Type::DATA), header(header)
+xpcc::tcpip::TCPHeader::TCPHeader(xpcc::Header& header, int dataSize):
+		type(Type::DATA), header(header), dataLength(dataSize)
 {
 
 }
@@ -25,6 +25,17 @@ xpcc::tcpip::TCPHeader::getType() const
 	return this->type;
 }
 
+int
+xpcc::tcpip::TCPHeader::getDataSize() const
+{
+	return this->dataLength;
+}
+
+bool
+xpcc::tcpip::TCPHeader::isDataMessage() const
+{
+	return (this->getType() == TCPHeader::Type::DATA);
+}
 
 xpcc::tcpip::TCPHeader&
 xpcc::tcpip::Message::getTCPHeader()
@@ -32,15 +43,15 @@ xpcc::tcpip::Message::getTCPHeader()
 	return this->header;
 }
 
-xpcc::tcpip::Message::Message(xpcc::Header& , SmartPointer payload):
-		header(header), data(payload), dataLength(payload.getSize())
+xpcc::tcpip::Message::Message(xpcc::Header& header, SmartPointer payload):
+		header(header, static_cast<int>(payload.getSize())), data(payload)
 {
 
 }
 
 
 xpcc::tcpip::Message::Message(uint8_t identifier):
-		header(identifier), data(), dataLength(0)
+		header(identifier), data()
 {
 }
 
@@ -55,7 +66,7 @@ xpcc::tcpip::Message::encodeMessage()
 	{
 		this->dataStorage[i] = header[i];
 	}
-	for(int i = xpcc::tcpip::TCPHeader::headerSize(); i<xpcc::tcpip::TCPHeader::headerSize() + this->dataLength; ++i)
+	for(int i = xpcc::tcpip::TCPHeader::headerSize(); i< this->getMessageLength(); ++i)
 	{
 		this->dataStorage[i] = content[i-xpcc::tcpip::TCPHeader::headerSize()];
 	}
@@ -77,15 +88,7 @@ xpcc::tcpip::Message::decode(boost::shared_ptr<char> msg)
 int
 xpcc::tcpip::Message::getMessageLength() const
 {
-	std::cout<<"header: "<<xpcc::tcpip::TCPHeader::headerSize()<<std::endl;
-	std::cout<<"dataLength: "<< this->dataLength<<std::endl;
-	return xpcc::tcpip::TCPHeader::headerSize() + this->dataLength;
-}
-
-bool
-xpcc::tcpip::Message::isDataMessage() const
-{
-	return (this->header.getType() == TCPHeader::Type::DATA);
+	return xpcc::tcpip::TCPHeader::headerSize() + this-> header.getDataSize();
 }
 
 xpcc::Header&
