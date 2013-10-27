@@ -43,19 +43,21 @@
 //xpcc dependencies
 #include <xpcc/architecture/platform/hosted/tcpip/tcpip_message.hpp>
 
-
-
 namespace xpcc
 {
 	namespace tcpip
 	{
 
 	    /**
-		 * For each component registered on the server on Distributor is created,
-		 * this Distrubutor handles sending of messages.
+		 * For each component registered on the server one Distributor is created,
+		 * this Distrubutor handles sending of messages to the component
 	     *
 	     *  \author Thorsten Lajewski
 	     */
+
+		//forward declaration
+		class Server;
+
 		class Distributor
 		{
 		public:
@@ -73,7 +75,7 @@ namespace xpcc
 
 		private:
 
-			void connect_handler(const boost::system::error_code& error);
+			void connectHandler(const boost::system::error_code& error);
 
 			void sendHandler(const boost::system::error_code& error);
 

@@ -34,7 +34,10 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 
-#include "tcpip_message.hpp"
+#include <list>
+
+#include <xpcc/architecture/platform/hosted/tcpip/tcpip_message.hpp>
+
 
 namespace xpcc{
 namespace tcpip{
@@ -44,6 +47,9 @@ namespace tcpip{
  	 *
  	 *  \author Thorsten Lajewski
  	 */
+
+	//forward delaration
+	class Client;
 
     class Receiver {
     public:
@@ -63,6 +69,8 @@ namespace tcpip{
 
 
     private:
+
+    	void acceptHandler(const boost::system::error_code& error);
 
     	void readHeader();
 

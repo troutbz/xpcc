@@ -43,9 +43,9 @@
 
 //-----------------------------------------------------------------------------
 //xpcc dependencies
-#include <xpcc/workflow/periodic_timer.hpp>
+#include <xpcc/processing/periodic_timer.hpp>
 #include <xpcc/architecture/platform/hosted/tcpip/tcpip_message.hpp>
-
+#include <xpcc/architecture/platform/hosted/tcpip/tcpip_receiver.hpp>
 
 
 namespace xpcc

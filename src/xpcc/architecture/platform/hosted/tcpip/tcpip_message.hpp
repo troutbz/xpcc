@@ -31,7 +31,7 @@
 
 #include <boost/asio.hpp>
 #include <xpcc/container/smart_pointer.hpp>
-#include <xpcc/communication/backend/header.hpp>
+#include <xpcc/communication/xpcc/backend/header.hpp>
 
 #include <stdint.h>
 

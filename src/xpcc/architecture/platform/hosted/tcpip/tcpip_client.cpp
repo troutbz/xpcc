@@ -1,13 +1,21 @@
 #include "tcpip_client.hpp"
 
 #include <iostream>
+#include <sstream>
+#include <string>
 
 xpcc::tcpip::Client::Client(std::string ip, int port):
-	serverPort(port),
-	ioService(new boost::asio::io_service())
+	connected(false),
+	writingMessages(false),
+	closeConnection(false),
+	ioService(new boost::asio::io_service()),
+	serverPort(port)
 {
 	boost::asio::ip::tcp::resolver resolver(*ioService);
-	boost::asio::ip::tcp::resolver::query query(ip, port);
+	//port required as string
+	std::stringstream portStream;
+	portStream<<port;
+	boost::asio::ip::tcp::resolver::query query(ip, portStream.str());
 	this->endpointIter = resolver.resolve(query);
 
 	//this->serviceThread = boost::shared_ptr<boost::thread>(new boost::thread(boost::bind(&boost::asio::io_service::run, ioService)));
@@ -45,7 +53,7 @@ xpcc::tcpip::Client::spawnReceiveThread(uint8_t id)
 	boost::shared_ptr<xpcc::tcpip::Receiver> receiver(new xpcc::tcpip::Receiver(this, id));
 	this->componentReceiver.push_back(receiver);
 	boost::shared_ptr<boost::thread> receiverThred(
-			new boost::thread(boost::bind(&xpcc::tcpip::Receiver::run, &receiver)));
+			new boost::thread(boost::bind(&xpcc::tcpip::Receiver::run, &*receiver)));
 }
 
 void
@@ -109,7 +117,7 @@ xpcc::tcpip::Client::writeHandler(const boost::system::error_code& error)
 void
 xpcc::tcpip::Client::receiveNewMessage(boost::shared_ptr<xpcc::tcpip::Message> message)
 {
-	this->receivedMessages->push_back(message);
+	this->receivedMessages.push_back(message);
 }
 
 

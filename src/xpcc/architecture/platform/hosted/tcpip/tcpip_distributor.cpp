@@ -1,5 +1,5 @@
 #include "tcpip_distributor.hpp"
-
+#include <xpcc/architecture/platform/hosted/tcpip/tcpip_server.hpp>
 
 xpcc::tcpip::Distributor::Distributor(xpcc::tcpip::Server* parent, std::string ip, int port)
 {
@@ -26,6 +26,7 @@ xpcc::tcpip::Distributor::sendMessage(boost::shared_ptr<xpcc::tcpip::Message> ms
           messagesToBeSent.front()->getMessageLength()),
           boost::bind(&xpcc::tcpip::Distributor::sendHandler, this,
             boost::asio::placeholders::error));
+    }
 }
 
 //TODO
@@ -36,7 +37,7 @@ xpcc::tcpip::Distributor::disconnect()
 }
 
 void
-xpcc::tcpip::Distributor::connect_handler(const boost::system::error_code& error)
+xpcc::tcpip::Distributor::connectHandler(const boost::system::error_code& error)
 {
 
 }

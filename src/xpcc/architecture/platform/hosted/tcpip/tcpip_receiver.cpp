@@ -1,5 +1,6 @@
 #include "tcpip_receiver.hpp"
 #include <xpcc/debug/logger.hpp>
+#include <xpcc/architecture/platform/hosted/tcpip/tcpip_client.hpp>
 
 // set new log level
 #undef XPCC_LOG_LEVEL
@@ -15,8 +16,8 @@ xpcc::tcpip::Receiver::Receiver(xpcc::tcpip::Client* parent, int componentId):
 {
 	XPCC_LOG_DEBUG<< "start receiver for component: "<<componentId<<xpcc::endl;
 	this->acceptor.async_accept(socket,
-			 boost::bind(&xpcc::tcpip::Server::acceptHandler, this,
-					 receiveConnection, boost::asio::placeholders::error));
+			 boost::bind(&xpcc::tcpip::Receiver::acceptHandler, this,
+					 boost::asio::placeholders::error));
 }
 
 
@@ -45,8 +46,8 @@ void
 xpcc::tcpip::Receiver::readMessage(const xpcc::tcpip::TCPHeader& header)
 {
 	int dataSize = header.getDataSize();
-    boost::asio::async_read(socket, dataSize
-        boost::asio::buffer(this->message, ),
+    boost::asio::async_read(socket,
+        boost::asio::buffer(this->message, dataSize),
         boost::bind(
           &xpcc::tcpip::Receiver::readMessageHandler, this,
           boost::asio::placeholders::error));
@@ -54,7 +55,7 @@ xpcc::tcpip::Receiver::readMessage(const xpcc::tcpip::TCPHeader& header)
 
 
 void
-xpcc::tcpip::Receiver::acceptHandler(boost::shared_ptr<xpcc::tcpip::Connection> receive,
+xpcc::tcpip::Receiver::acceptHandler(
 		const boost::system::error_code& error)
 {
 	XPCC_LOG_DEBUG << "Component " << this->componentId << ": connection established" << xpcc::endl;
@@ -83,8 +84,8 @@ xpcc::tcpip::Receiver::readHeaderHandler(const boost::system::error_code& error)
 {
 	if(!error)
 	{
-		xpcc::tcpip::TCPHeader* messageHeader = reinterpret_cast<xpcc::tcpip::TCPHeader>(this->header);
-		this->readMessage(messageHeader);
+		xpcc::tcpip::TCPHeader* messageHeader = reinterpret_cast<xpcc::tcpip::TCPHeader*>(this->header);
+		this->readMessage(*messageHeader);
 	}
 	else{
 		//TODO error handling
@@ -96,9 +97,9 @@ xpcc::tcpip::Receiver::readMessageHandler(const boost::system::error_code& error
 {
 	if(!error)
 	{
-		xpcc::tcpip::TCPHeader* messageHeader = reinterpret_cast<xpcc::tcpip::TCPHeader>(this->header);
+		xpcc::tcpip::TCPHeader* messageHeader = reinterpret_cast<xpcc::tcpip::TCPHeader*>(this->header);
 		SmartPointer* data = reinterpret_cast<SmartPointer*>(this->message);
-		boost::shared_ptr<xpcc::tcpip::Message> message( new xpcc::tcpip::Message(messageHeader, data));
+		boost::shared_ptr<xpcc::tcpip::Message> message( new xpcc::tcpip::Message(messageHeader->getXpccHeader(), *data));
 		this->parent->receiveNewMessage(message);
 		if(!this->shutdown)
 		{

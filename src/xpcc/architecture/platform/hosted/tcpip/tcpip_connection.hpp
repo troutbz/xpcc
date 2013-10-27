@@ -39,7 +39,7 @@ namespace xpcc{
 namespace tcpip{
 
 	/**
-	 * \brief a receiving connection of the server
+	 * \brief a receiving of messages
  	 *
  	 *  \author Thorsten Lajewski
  	 */
