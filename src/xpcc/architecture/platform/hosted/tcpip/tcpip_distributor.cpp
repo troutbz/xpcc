@@ -1,8 +1,21 @@
 #include "tcpip_distributor.hpp"
 #include <xpcc/architecture/platform/hosted/tcpip/tcpip_server.hpp>
+#include <sstream>
 
-xpcc::tcpip::Distributor::Distributor(xpcc::tcpip::Server* parent, std::string ip, int port)
+xpcc::tcpip::Distributor::Distributor(xpcc::tcpip::Server* parent, std::string ip, int port):
+	connected(false),
+	writingMessages(false),
+	ioService(parent->getIoService()),
+	server(parent),
+	port(port)
 {
+	boost::asio::ip::tcp::resolver resolver(*ioService);
+	//port required as string
+	std::stringstream portStream;
+	portStream<<port;
+	boost::asio::ip::tcp::resolver::query query(ip, portStream.str());
+	this->endpointIter = resolver.resolve(query);
+	this->sendSocket.reset(new boost::asio::ip::tcp::socket(*ioService));
 
 }
 

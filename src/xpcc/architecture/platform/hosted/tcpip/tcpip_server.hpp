@@ -66,6 +66,9 @@ namespace xpcc
 
 			void update();
 
+			boost::shared_ptr< boost::asio::io_service >
+			getIoService();
+
 
 
 		private:

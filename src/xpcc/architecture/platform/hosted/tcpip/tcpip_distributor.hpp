@@ -72,7 +72,6 @@ namespace xpcc
 			//close the tcpip connection
 			void disconnect();
 
-
 		private:
 
 			void connectHandler(const boost::system::error_code& error);
@@ -87,7 +86,9 @@ namespace xpcc
 			boost::shared_ptr< boost::asio::io_service >  ioService;
 
 			//send connection to the component
+			Server* server;
 			int port;
+
 			boost::asio::ip::tcp::resolver::iterator endpointIter;
 			boost::shared_ptr<boost::asio::ip::tcp::socket> sendSocket;
 			std::list< boost::shared_ptr<xpcc::tcpip::Message> > messagesToBeSent;
@@ -95,4 +96,4 @@ namespace xpcc
 		};
 	}
 }
-#endif // XPCC_TCPIP__CLIENt_HPP
+#endif // XPCC_TCPIP__CLIENT_HPP

@@ -11,6 +11,11 @@ xpcc::tcpip::Server::Server(int port):
 	ioService->run();
 }
 
+boost::shared_ptr< boost::asio::io_service >
+xpcc::tcpip::Server::getIoService()
+{
+	return this->ioService;
+}
 
 void
 xpcc::tcpip::Server::accept_handler(boost::shared_ptr<xpcc::tcpip::Connection> receive,
