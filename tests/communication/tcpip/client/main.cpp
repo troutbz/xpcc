@@ -19,8 +19,10 @@ main()
     XPCC_LOG_INFO << "This is a test of the tcpip client!" << xpcc::endl;
 	
     xpcc::tcpip::Client client("127.0.0.1", 6666);
-    XPCC_LOG_INFO << "Adding a component!" << xpcc::endl;
+    XPCC_LOG_INFO << "Adding first component!" << xpcc::endl;
     client.addComponent(11);
+    XPCC_LOG_INFO << "Adding second component!" << xpcc::endl;
+    client.addComponent(14);
 	while (1)
 	{
         client.update();
