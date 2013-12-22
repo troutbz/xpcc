@@ -60,5 +60,11 @@ xpcc::tcpip::Connection::handleReadBody(const boost::system::error_code& error)
     		std::cout<<"Spawning sender for componentId "<<componentId;
     		this->server->spawnSendThread(componentId, ip);
     	}
+
+        boost::asio::async_read(socket,
+            boost::asio::buffer(this->header, xpcc::tcpip::TCPHeader::headerSize()),
+            boost::bind(
+              &xpcc::tcpip::Connection::handleReadHeader, this,
+              boost::asio::placeholders::error));
     }
 }
