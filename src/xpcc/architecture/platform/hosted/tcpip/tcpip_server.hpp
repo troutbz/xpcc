@@ -31,6 +31,8 @@
 
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
+
+#include <boost/thread/thread.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 
@@ -85,6 +87,9 @@ namespace xpcc
 					const boost::system::error_code& error);
 
 			boost::shared_ptr<boost::asio::io_service> ioService;
+			boost::shared_ptr<boost::asio::io_service::work> work;
+			boost::thread ioThread;
+
 			boost::asio::ip::tcp::endpoint endpoint;
 			boost::asio::ip::tcp::acceptor acceptor;
 

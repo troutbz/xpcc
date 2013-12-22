@@ -5,12 +5,13 @@
 
 xpcc::tcpip::Server::Server(int port):
 	ioService(new boost::asio::io_service()),
+	work(new boost::asio::io_service::work(*ioService)),
+	ioThread(boost::bind(&boost::asio::io_service::run, ioService)),
 	endpoint(boost::asio::ip::tcp::v4(), port),
 	acceptor(*ioService, endpoint),
 	serverPort(port)
 {
 	spawnReceiveConnection();
-	ioService->run();
 }
 
 boost::shared_ptr< boost::asio::io_service >
