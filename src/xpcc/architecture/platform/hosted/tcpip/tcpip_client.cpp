@@ -9,6 +9,8 @@ xpcc::tcpip::Client::Client(std::string ip, int port):
 	writingMessages(false),
 	closeConnection(false),
 	ioService(new boost::asio::io_service()),
+	work(new boost::asio::io_service::work(*ioService)),
+	ioThread(boost::bind(&boost::asio::io_service::run, ioService)),
 	serverPort(port)
 {
 	boost::asio::ip::tcp::resolver resolver(*ioService);
@@ -25,7 +27,6 @@ xpcc::tcpip::Client::Client(std::string ip, int port):
 	boost::asio::async_connect(*sendSocket, endpointIter,
         boost::bind(&xpcc::tcpip::Client::connect_handler, this,
           boost::asio::placeholders::error));
-	this->ioService->run();
 
 }
 
@@ -52,9 +53,9 @@ xpcc::tcpip::Client::spawnReceiveThread(uint8_t id)
 {
 	boost::shared_ptr<xpcc::tcpip::Receiver> receiver(new xpcc::tcpip::Receiver(this, id));
 	this->componentReceiver.push_back(receiver);
+	std::cout<<"Receiver created"<<std::endl;
 	//boost::shared_ptr<boost::thread> receiverThred(
 	//		new boost::thread(boost::bind(&xpcc::tcpip::Receiver::run, &*receiver)));
-	//ioService->run();
 }
 
 void

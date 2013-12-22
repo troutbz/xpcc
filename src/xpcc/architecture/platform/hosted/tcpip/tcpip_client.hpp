@@ -128,6 +128,8 @@ namespace xpcc
 			bool closeConnection;
 
 			boost::shared_ptr< boost::asio::io_service >  ioService;
+			boost::shared_ptr< boost::asio::io_service::work > work;
+			boost::thread ioThread;
 
 			//send connection to the server
 			int serverPort;

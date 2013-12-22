@@ -19,8 +19,6 @@ xpcc::tcpip::Receiver::Receiver(xpcc::tcpip::Client* parent, int componentId):
 	this->acceptor.async_accept(socket,
 			 boost::bind(&xpcc::tcpip::Receiver::acceptHandler, this,
 					 boost::asio::placeholders::error));
-	this->parent->getIOService()->run();
-
 }
 
 
