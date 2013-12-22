@@ -1,8 +1,9 @@
 #include "tcpip_connection.hpp"
+#include "tcpip_server.hpp"
 
-
-xpcc::tcpip::Connection::Connection(boost::shared_ptr<boost::asio::io_service> ioService):
-    socket(*ioService)
+xpcc::tcpip::Connection::Connection(boost::shared_ptr<boost::asio::io_service> ioService, xpcc::tcpip::Server* server):
+    socket(*ioService),
+    server(server)
 {
 
 }
@@ -53,7 +54,11 @@ xpcc::tcpip::Connection::handleReadBody(const boost::system::error_code& error)
     	}
     	else
     	{
-    		//message is a register message, spawn a send connection
+    		//message is a register message, spawn a new distributor thread
+    		std::string ip = socket.remote_endpoint().address().to_string();
+    		int componentId = header->getXpccHeader().source;
+    		std::cout<<"Spawning sender for componentId "<<componentId;
+    		this->server->spawnSendThread(componentId, ip);
     	}
     }
 }

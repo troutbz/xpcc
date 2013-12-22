@@ -62,7 +62,7 @@ namespace xpcc
 		{
 		public:
 
-			Distributor(xpcc::tcpip::Server* parent, std::string ip, int port);
+			Distributor(xpcc::tcpip::Server* parent, std::string ip, uint8_t component_id);
 
 			void run();
 

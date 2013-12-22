@@ -62,7 +62,7 @@ namespace tcpip{
 
     	//places the first received message in the client message list,
     	//where it's handled by the postman
-    	// returns true if a message was pushlied
+    	// returns true if a message was published
     	// false if no message is available
     	//TODO make thread safe
     	bool publishMessage();

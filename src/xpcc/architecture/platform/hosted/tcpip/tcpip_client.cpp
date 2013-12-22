@@ -52,8 +52,9 @@ xpcc::tcpip::Client::spawnReceiveThread(uint8_t id)
 {
 	boost::shared_ptr<xpcc::tcpip::Receiver> receiver(new xpcc::tcpip::Receiver(this, id));
 	this->componentReceiver.push_back(receiver);
-	boost::shared_ptr<boost::thread> receiverThred(
-			new boost::thread(boost::bind(&xpcc::tcpip::Receiver::run, &*receiver)));
+	//boost::shared_ptr<boost::thread> receiverThred(
+	//		new boost::thread(boost::bind(&xpcc::tcpip::Receiver::run, &*receiver)));
+	//ioService->run();
 }
 
 void

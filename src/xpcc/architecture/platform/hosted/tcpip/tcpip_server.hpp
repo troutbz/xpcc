@@ -51,6 +51,10 @@ namespace xpcc
 	     *
 	     *  \author Thorsten Lajewski
 	     */
+
+		//forward declaration
+		class Distributor;
+
 		class Server
 		{
 		public:
@@ -60,7 +64,7 @@ namespace xpcc
 
 			void spawnReceiveConnection();
 
-			void spawnSendThread(uint8_t componentId);
+			void spawnSendThread(uint8_t componentId, std::string ip);
 
 			void  distribute();
 
@@ -69,6 +73,10 @@ namespace xpcc
 			boost::shared_ptr< boost::asio::io_service >
 			getIoService();
 
+			inline int getPort() const
+			{
+				return serverPort;
+			}
 
 
 		private:
@@ -82,6 +90,9 @@ namespace xpcc
 
 			int serverPort;
 			std::list<boost::shared_ptr<xpcc::tcpip::Connection> > receiveConnections;
+
+
+			std::map<uint8_t, boost::shared_ptr<xpcc::tcpip::Distributor> > distributorMap;
 
 		};
 	}

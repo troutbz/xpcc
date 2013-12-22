@@ -8,16 +8,19 @@
 
 xpcc::tcpip::Receiver::Receiver(xpcc::tcpip::Client* parent, int componentId):
 	parent(parent), componentId(componentId),
-	endpoint(boost::asio::ip::tcp::v4(), parent->getServerPort() + componentId),
+	endpoint(boost::asio::ip::tcp::v4(), parent->getServerPort() + 1 + componentId),
 	acceptor(*(parent->getIOService()), endpoint),
 	socket(*(parent->getIOService())),
 	connected(false),
 	shutdown(false)
 {
-	XPCC_LOG_DEBUG<< "start receiver for component: "<<componentId<<xpcc::endl;
+	XPCC_LOG_DEBUG<< "start receiver for component: "<<componentId<<" on port "<< parent->getServerPort() + 1 + componentId
+			<< xpcc::endl;
 	this->acceptor.async_accept(socket,
 			 boost::bind(&xpcc::tcpip::Receiver::acceptHandler, this,
 					 boost::asio::placeholders::error));
+	this->parent->getIOService()->run();
+
 }
 
 
@@ -71,10 +74,11 @@ xpcc::tcpip::Receiver::acceptHandler(
 void
 xpcc::tcpip::Receiver::run()
 {
+	/*
 	while(!connected)
 	{
 		boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
-	}
+	}*/
 
 	this->readHeader();
 }

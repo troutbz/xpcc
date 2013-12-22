@@ -1,5 +1,7 @@
 #include "tcpip_server.hpp"
+
 #include <iostream>
+#include "tcpip_distributor.hpp"
 
 xpcc::tcpip::Server::Server(int port):
 	ioService(new boost::asio::io_service()),
@@ -33,10 +35,19 @@ xpcc::tcpip::Server::accept_handler(boost::shared_ptr<xpcc::tcpip::Connection> r
     spawnReceiveConnection();
 }
 
+
+void
+xpcc::tcpip::Server::spawnSendThread(uint8_t componentId, std::string ip)
+{
+	boost::shared_ptr<xpcc::tcpip::Distributor> sender(
+			new xpcc::tcpip::Distributor(this, ip, componentId));
+	this->distributorMap.emplace(componentId, sender);
+}
+
 void
 xpcc::tcpip::Server::spawnReceiveConnection()
 {
-	boost::shared_ptr<xpcc::tcpip::Connection> receiveConnection(new Connection(ioService));
+	boost::shared_ptr<xpcc::tcpip::Connection> receiveConnection(new Connection(ioService, this));
 		this->acceptor.async_accept(receiveConnection->getSocket(),
 				 boost::bind(&xpcc::tcpip::Server::accept_handler, this,
 						 receiveConnection, boost::asio::placeholders::error));

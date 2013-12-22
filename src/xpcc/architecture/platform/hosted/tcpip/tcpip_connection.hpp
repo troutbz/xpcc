@@ -33,13 +33,18 @@
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
+
 #include "tcpip_message.hpp"
+
 
 namespace xpcc{
 namespace tcpip{
 
+	class Server;
+
 	/**
-	 * \brief a receiving of messages
+	 * \brief a receiving connection for each container connected to the server,
+	 * 		  may receive messages from different components
  	 *
  	 *  \author Thorsten Lajewski
  	 */
@@ -50,7 +55,7 @@ namespace tcpip{
 
     public:
 
-    	  Connection(boost::shared_ptr<boost::asio::io_service> ioService);
+    	  Connection(boost::shared_ptr<boost::asio::io_service> ioService, xpcc::tcpip::Server* server);
 
     	  void start();
 
@@ -69,6 +74,9 @@ namespace tcpip{
     	  void handleReadBody(const boost::system::error_code& error);
 
     	  boost::asio::ip::tcp::socket socket;
+
+    	  //pointer to parent server
+    	  xpcc::tcpip::Server* server;
 
     	  //storage for current received message
     	  char header[xpcc::tcpip::TCPHeader::HSIZE];
