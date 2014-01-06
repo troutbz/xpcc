@@ -29,6 +29,11 @@ xpcc::tcpip::Distributor::run()
 
 }
 
+void
+xpcc::tcpip::Distributor::disconnect()
+{
+
+}
 
 void
 xpcc::tcpip::Distributor::sendMessage(boost::shared_ptr<xpcc::tcpip::Message> msg)
@@ -44,13 +49,6 @@ xpcc::tcpip::Distributor::sendMessage(boost::shared_ptr<xpcc::tcpip::Message> ms
           boost::bind(&xpcc::tcpip::Distributor::sendHandler, this,
             boost::asio::placeholders::error));
     }
-}
-
-//TODO
-void
-xpcc::tcpip::Distributor::disconnect()
-{
-
 }
 
 void
@@ -76,6 +74,9 @@ xpcc::tcpip::Distributor::sendHandler(const boost::system::error_code& error)
     				boost::bind(&xpcc::tcpip::Distributor::sendHandler, this,
     				boost::asio::placeholders::error));
       }
+    }
+    else{
+    	//TODO ERROR handler
     }
 }
 

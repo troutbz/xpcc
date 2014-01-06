@@ -39,6 +39,7 @@
 #include <list>
 
 #include "tcpip_connection.hpp"
+#include "tcpip_message.hpp"
 
 namespace xpcc
 {
@@ -68,7 +69,7 @@ namespace xpcc
 
 			void spawnSendThread(uint8_t componentId, std::string ip);
 
-			void  distribute();
+			void  distributeDataMessage(xpcc::tcpip::Message msg);
 
 			void update();
 

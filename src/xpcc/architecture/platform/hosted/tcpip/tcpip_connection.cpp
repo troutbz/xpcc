@@ -1,6 +1,8 @@
 #include "tcpip_connection.hpp"
 #include "tcpip_server.hpp"
 
+#include <xpcc/container/smart_pointer.hpp>
+
 xpcc::tcpip::Connection::Connection(boost::shared_ptr<boost::asio::io_service> ioService, xpcc::tcpip::Server* server):
     socket(*ioService),
     server(server)
@@ -50,7 +52,9 @@ xpcc::tcpip::Connection::handleReadBody(const boost::system::error_code& error)
     	xpcc::tcpip::TCPHeader* header = reinterpret_cast<xpcc::tcpip::TCPHeader*>(this->header);
     	if(header->isDataMessage())
     	{
+    		xpcc::tcpip::Message msg(header->getXpccHeader(), SmartPointer(this->message));
     		//evaluating data only required if Message is a data message
+    		this->server->distributeDataMessage(msg);
     	}
     	else
     	{
@@ -66,5 +70,8 @@ xpcc::tcpip::Connection::handleReadBody(const boost::system::error_code& error)
             boost::bind(
               &xpcc::tcpip::Connection::handleReadHeader, this,
               boost::asio::placeholders::error));
+    }
+    else{
+    	//TODO error handling
     }
 }
