@@ -106,7 +106,7 @@ namespace xpcc
 
 			xpcc::tcpip::TCPHeader& getTCPHeader();
 
-			boost::shared_ptr<xpcc::SmartPointer> getMessageData();
+			xpcc::SmartPointer getMessagePayload() const;
 
 		private:
 

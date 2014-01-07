@@ -108,3 +108,9 @@ xpcc::tcpip::Message::getXpccHeader()
 {
 	return this->header.getXpccHeader();
 }
+
+xpcc::SmartPointer
+xpcc::tcpip::Message::getMessagePayload() const
+{
+	return this->data;
+}

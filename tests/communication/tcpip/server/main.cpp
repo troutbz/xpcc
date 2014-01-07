@@ -16,7 +16,6 @@ main()
 {
 	
     XPCC_LOG_INFO << "This is a test of the tcpip server!" << xpcc::endl;
-	
     xpcc::tcpip::Server server(6666);
 
 	while (1)
