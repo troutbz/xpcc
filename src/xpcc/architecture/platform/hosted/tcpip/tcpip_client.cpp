@@ -42,7 +42,6 @@ xpcc::tcpip::Client::addComponent(uint8_t id)
 	boost::shared_ptr<ComponentInfo> newComponent = boost::shared_ptr<ComponentInfo>(new ComponentInfo(id));
 	this->componentMap.insert(std::make_pair (id,newComponent));
 	boost::shared_ptr<xpcc::tcpip::Message> msg(new xpcc::tcpip::Message(id));
-	std::cout<<"add Component"<<std::endl;
 	this->spawnReceiveThread(id);
 	this->sendPacket(msg);
 
@@ -53,9 +52,9 @@ xpcc::tcpip::Client::spawnReceiveThread(uint8_t id)
 {
 	boost::shared_ptr<xpcc::tcpip::Receiver> receiver(new xpcc::tcpip::Receiver(this, id));
 	this->componentReceiver.push_back(receiver);
-	std::cout<<"Receiver created"<<std::endl;
-	//boost::shared_ptr<boost::thread> receiverThred(
-	//		new boost::thread(boost::bind(&xpcc::tcpip::Receiver::run, &*receiver)));
+	boost::shared_ptr<boost::thread> receiverThread(
+			new boost::thread(boost::bind(&xpcc::tcpip::Receiver::run, &*receiver)));
+	this->receiveThreadPool.push_back(receiverThread);
 }
 
 void
@@ -73,7 +72,7 @@ xpcc::tcpip::Client::sendAlivePing(int identifier)
 void
 xpcc::tcpip::Client::connect_handler(const boost::system::error_code& error)
 {
-	std::cout << "Connected with error-code: "<< error <<std::endl;
+	//XPCC_LOG_DEBUG << "Client connected with error-code: "<< error.message() <<xpcc::endl;
 }
 
 //send a xpcc packet to the server
@@ -84,8 +83,9 @@ xpcc::tcpip::Client::sendPacket(boost::shared_ptr<xpcc::tcpip::Message> msg)
 	messagesToBeSent.push_back(msg);
     if (!writingMessages)
     {
-      std::cout<<"Sending: "<<messagesToBeSent.front()->getMessageLength() <<std::endl;
+
       messagesToBeSent.front()->encodeMessage();
+
       boost::asio::async_write(*sendSocket,
           boost::asio::buffer(messagesToBeSent.front()->getEncodedMessage(),
           messagesToBeSent.front()->getMessageLength()),
@@ -97,7 +97,6 @@ xpcc::tcpip::Client::sendPacket(boost::shared_ptr<xpcc::tcpip::Message> msg)
 void
 xpcc::tcpip::Client::writeHandler(const boost::system::error_code& error)
 {
-	std::cout<<"send Complete"<<std::endl;
     if (!error)
     {
     	//Remove sent message
@@ -120,6 +119,20 @@ void
 xpcc::tcpip::Client::receiveNewMessage(boost::shared_ptr<xpcc::tcpip::Message> message)
 {
 	this->receivedMessages.push_back(message);
+}
+
+bool
+xpcc::tcpip::Client::isMessageAvailable() const
+{
+	return !this->receivedMessages.empty();
+}
+
+boost::shared_ptr<xpcc::tcpip::Message>
+xpcc::tcpip::Client::getMessage()
+{
+	boost::shared_ptr<xpcc::tcpip::Message> msg = this->receivedMessages.front();
+	this->receivedMessages.pop_front();
+	return msg;
 }
 
 

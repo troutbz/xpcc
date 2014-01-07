@@ -46,6 +46,7 @@
 #include <xpcc/processing/periodic_timer.hpp>
 #include <xpcc/architecture/platform/hosted/tcpip/tcpip_message.hpp>
 #include <xpcc/architecture/platform/hosted/tcpip/tcpip_receiver.hpp>
+#include <xpcc/debug/logger.hpp>
 
 
 namespace xpcc
@@ -83,9 +84,12 @@ namespace xpcc
 			//send a xpcc packet to the server
 			void sendPacket(boost::shared_ptr<xpcc::tcpip::Message> msg);
 
+			bool isMessageAvailable() const;
+
 			//get a pointer to the last message in the receivedMessages list
 			boost::shared_ptr<xpcc::tcpip::Message> getMessage();
 
+			//place new message in the received messages list
 			void receiveNewMessage(boost::shared_ptr<xpcc::tcpip::Message> message);
 
 			//remove last Message from the receivedMessages list

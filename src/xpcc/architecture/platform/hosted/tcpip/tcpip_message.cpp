@@ -4,7 +4,7 @@ xpcc::tcpip::TCPHeader::TCPHeader(uint8_t sender):
 		type(Type::REGISTER), header(), dataLength(0)
 {
 	this->header.source = sender;
-	std::cout<<"Type"<<sizeof(Type)<<std::endl;
+
 }
 
 xpcc::tcpip::TCPHeader::TCPHeader(xpcc::Header& header, int dataSize):
@@ -25,7 +25,7 @@ xpcc::tcpip::TCPHeader::getType() const
 	return this->type;
 }
 
-int
+uint8_t
 xpcc::tcpip::TCPHeader::getDataSize() const
 {
 	return this->dataLength;
@@ -61,14 +61,26 @@ xpcc::tcpip::Message::encodeMessage()
 {
 	//deep copy message to char array
 	char* header = reinterpret_cast<char*>(&this->getTCPHeader());
-	char* content = this->data.get<char*>();
+
+	for(int i = 0; i< this->getMessageLength(); ++i)
+	{
+		this->dataStorage[i] = 0;
+	}
+
+
 	for(int i = 0; i<xpcc::tcpip::TCPHeader::headerSize(); ++i)
 	{
 		this->dataStorage[i] = header[i];
 	}
-	for(int i = xpcc::tcpip::TCPHeader::headerSize(); i< this->getMessageLength(); ++i)
+
+	if(this->getTCPHeader().getDataSize() > 0)
 	{
-		this->dataStorage[i] = content[i-xpcc::tcpip::TCPHeader::headerSize()];
+		uint8_t* dataPtr = this->data.getPointer();
+
+		for(int i = xpcc::tcpip::TCPHeader::headerSize(); i< this->getMessageLength(); ++i)
+		{
+			this->dataStorage[i] = static_cast<char>(dataPtr[i-xpcc::tcpip::TCPHeader::headerSize()]);
+		}
 	}
 }
 
@@ -78,8 +90,8 @@ xpcc::tcpip::Message::getEncodedMessage() const
 	return this->dataStorage;
 }
 
-bool
-xpcc::tcpip::Message::decode(boost::shared_ptr<char> msg)
+xpcc::tcpip::Message::Message(const Message& msg):
+ header(msg.header), data(msg.data)
 {
 
 }

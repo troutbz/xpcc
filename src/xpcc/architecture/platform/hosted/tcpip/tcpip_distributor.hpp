@@ -42,6 +42,7 @@
 //-----------------------------------------------------------------------------
 //xpcc dependencies
 #include <xpcc/architecture/platform/hosted/tcpip/tcpip_message.hpp>
+#include <xpcc/debug/logger.hpp>
 
 namespace xpcc
 {

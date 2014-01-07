@@ -21,7 +21,7 @@ xpcc::tcpip::Connection::getSocket()
 void
 xpcc::tcpip::Connection::start()
 {
-	std::cout<< "receive: "<<xpcc::tcpip::TCPHeader::headerSize()<< "byte"<<std::endl;
+
     boost::asio::async_read(socket,
         boost::asio::buffer(this->header, xpcc::tcpip::TCPHeader::headerSize()),
         boost::bind(
@@ -33,7 +33,7 @@ xpcc::tcpip::Connection::start()
 void
 xpcc::tcpip::Connection::handleReadHeader(const boost::system::error_code& error)
 {
-	std::cout << "Received Header"<<std::endl;
+
 	if(! error){
 		xpcc::tcpip::TCPHeader* header = reinterpret_cast<xpcc::tcpip::TCPHeader*>(this->header);
 	    boost::asio::async_read(socket,
@@ -47,9 +47,11 @@ xpcc::tcpip::Connection::handleReadHeader(const boost::system::error_code& error
 void
 xpcc::tcpip::Connection::handleReadBody(const boost::system::error_code& error)
 {
-	std::cout << "Received Body"<<std::endl;
+
     if(! error){
+
     	xpcc::tcpip::TCPHeader* header = reinterpret_cast<xpcc::tcpip::TCPHeader*>(this->header);
+
     	if(header->isDataMessage())
     	{
     		xpcc::tcpip::Message msg(header->getXpccHeader(), SmartPointer(this->message));
@@ -61,7 +63,7 @@ xpcc::tcpip::Connection::handleReadBody(const boost::system::error_code& error)
     		//message is a register message, spawn a new distributor thread
     		std::string ip = socket.remote_endpoint().address().to_string();
     		int componentId = header->getXpccHeader().source;
-    		std::cout<<"Spawning sender for componentId "<<componentId;
+    		XPCC_LOG_DEBUG<<"Spawning sender for componentId "<< componentId << xpcc::endl;
     		this->server->spawnSendThread(componentId, ip);
     	}
 

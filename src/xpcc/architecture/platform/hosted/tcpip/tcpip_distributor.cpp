@@ -9,7 +9,7 @@ xpcc::tcpip::Distributor::Distributor(xpcc::tcpip::Server* parent, std::string i
 	server(parent),
 	port(server->getPort()+1+component_id)
 {
-	std::cout << "Distributor for "<< port<< "started"<<std::endl;
+	XPCC_LOG_DEBUG << "Distributor for "<< port<< " started"<<xpcc::endl;
 	boost::asio::ip::tcp::resolver resolver(*ioService);
 	//port required as string
 	std::stringstream portStream;
@@ -42,19 +42,19 @@ xpcc::tcpip::Distributor::sendMessage(boost::shared_ptr<xpcc::tcpip::Message> ms
 	messagesToBeSent.push_back(msg);
     if (!writingMessages)
     {
-      messagesToBeSent.front()->encodeMessage();
-      boost::asio::async_write(*sendSocket,
-          boost::asio::buffer(messagesToBeSent.front()->getEncodedMessage(),
-          messagesToBeSent.front()->getMessageLength()),
-          boost::bind(&xpcc::tcpip::Distributor::sendHandler, this,
-            boost::asio::placeholders::error));
+    	messagesToBeSent.front()->encodeMessage();
+    	boost::asio::async_write(*sendSocket,
+    			boost::asio::buffer(messagesToBeSent.front()->getEncodedMessage(),
+    					messagesToBeSent.front()->getMessageLength()),
+    					boost::bind(&xpcc::tcpip::Distributor::sendHandler, this,
+    							boost::asio::placeholders::error));
     }
 }
 
 void
 xpcc::tcpip::Distributor::connectHandler(const boost::system::error_code& error)
 {
-	std::cout << "Distributor connected with: "<< error <<std::endl;
+	//XPCC_LOG_DEBUG << "Distributor connected with error: "<< error << xpcc::endl;
 }
 
 void

@@ -57,15 +57,16 @@ namespace xpcc
 			//create Data Message
 			TCPHeader(xpcc::Header& header, int dataSize);
 
-			static constexpr int headerSize(){
-				return sizeof(Type)+sizeof(xpcc::Header);
-			}
-
 			bool isDataMessage() const;
 
-			int getDataSize() const;
+			uint8_t getDataSize() const;
 
-			static constexpr int HSIZE = sizeof(Type)+sizeof(xpcc::Header);
+			static constexpr int HSIZE = sizeof(Type)+sizeof(uint8_t)+sizeof(xpcc::Header);
+
+			static constexpr int headerSize(){
+				//return sizeof(Type)+sizeof(xpcc::Header);
+				return HSIZE;
+			}
 
 			xpcc::Header& getXpccHeader();
 
@@ -76,7 +77,7 @@ namespace xpcc
 
 			Type type;
 			xpcc::Header header;
-			int dataLength;
+			uint8_t dataLength;
 
         };
 
@@ -90,9 +91,10 @@ namespace xpcc
 			//this constructor generates a data message
 			Message(xpcc::Header& , SmartPointer payload);
 
-			Message(uint8_t identifier);
+			//copy constructor
+			Message(const Message& msg);
 
-			bool decode(boost::shared_ptr<char> msg);
+			Message(uint8_t identifier);
 
 			void encodeMessage();
 

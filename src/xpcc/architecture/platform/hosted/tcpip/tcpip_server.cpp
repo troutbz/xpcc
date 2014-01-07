@@ -25,8 +25,8 @@ void
 xpcc::tcpip::Server::accept_handler(boost::shared_ptr<xpcc::tcpip::Connection> receive,
 		const boost::system::error_code& error)
 {
-	std::cout<< "Connection from " << receive->getSocket().remote_endpoint().address().to_string()
-			<< " accepted" << std::endl;
+	//XPCC_LOG_DEBUG<< "Connection from " << receive->getSocket().remote_endpoint().address().to_string()
+	//		<< " accepted" << xpcc::endl;
 
     if (!error)
     {
@@ -78,8 +78,8 @@ xpcc::tcpip::Server::distributeDataMessage(xpcc::tcpip::Message msg)
 		else
 		{
 			//drop message print warning
-			XPCC_LOG_WARNING << "Message to Component with id "<< msg.getXpccHeader().destination << "dropped! "<<
-					"Component " << msg.getXpccHeader().destination << "not registered on server!" << xpcc::endl;
+			XPCC_LOG_WARNING << "Message to Component with id "<< msg.getXpccHeader().destination << " dropped! "<<
+					"Component " << msg.getXpccHeader().destination << " not registered on server!" << xpcc::endl;
 		}
 
 	}

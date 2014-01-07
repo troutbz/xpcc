@@ -46,12 +46,15 @@ xpcc::tcpip::Receiver::readHeader()
 void
 xpcc::tcpip::Receiver::readMessage(const xpcc::tcpip::TCPHeader& header)
 {
+
 	int dataSize = header.getDataSize();
+
     boost::asio::async_read(socket,
         boost::asio::buffer(this->message, dataSize),
         boost::bind(
           &xpcc::tcpip::Receiver::readMessageHandler, this,
           boost::asio::placeholders::error));
+
 }
 
 
@@ -72,11 +75,11 @@ xpcc::tcpip::Receiver::acceptHandler(
 void
 xpcc::tcpip::Receiver::run()
 {
-	/*
+
 	while(!connected)
 	{
 		boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
-	}*/
+	}
 
 	this->readHeader();
 }
@@ -100,8 +103,8 @@ xpcc::tcpip::Receiver::readMessageHandler(const boost::system::error_code& error
 	if(!error)
 	{
 		xpcc::tcpip::TCPHeader* messageHeader = reinterpret_cast<xpcc::tcpip::TCPHeader*>(this->header);
-		SmartPointer* data = reinterpret_cast<SmartPointer*>(this->message);
-		boost::shared_ptr<xpcc::tcpip::Message> message( new xpcc::tcpip::Message(messageHeader->getXpccHeader(), *data));
+		SmartPointer payload(this->message);
+		boost::shared_ptr<xpcc::tcpip::Message> message( new xpcc::tcpip::Message(messageHeader->getXpccHeader(), payload));
 		this->parent->receiveNewMessage(message);
 		if(!this->shutdown)
 		{
