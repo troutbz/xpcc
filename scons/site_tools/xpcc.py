@@ -256,7 +256,7 @@ def generate(env, **kw):
 
 		architecture_derecated = parser.get('build', 'architecture', 'deprecated')
 		if architecture_derecated != "deprecated":
-			env.Warn("Specifying architecture is deprecated and replaced only by the Device ID.")
+			env.Warn("Specifying architecture is deprecated and replaced by only the Device ID ('device=...'.")
 
 		projectName = parser.get('general', 'name')
 
@@ -357,19 +357,8 @@ def generate(env, **kw):
 		# path to the headers of a very small and incomplete libstdc++ implementation
 		env.Append(CPPPATH = [os.path.join(rootpath, 'src', 'stdc++')])
 
-	elif env['ARCHITECTURE'] == 'hosted':
-		if device == 'linux':
-			libs = ['boost_thread-mt', 'boost_system']
-			libpath = ['/usr/lib/']
-		else:
-			libs = []
-			libpath = []
-		env['CXXCOM'] = []
-		env['LINKCOM'] = []
-		env['LIBS'] = libs
-		env['LIBPATH'] = libpath
-		env['ENV'] = os.environ
-		
+	elif env['ARCHITECTURE'].startswith('hosted'):
+		env['HOSTED_DEVICE'] = device
 		env.Tool('hosted')
 	elif env['ARCHITECTURE'] in ['arm7tdmi', 'cortex-m0', 'cortex-m3', 'cortex-m4', 'cortex-m4f']:
 		if env['ARCHITECTURE'] == 'cortex-m4f':
@@ -380,6 +369,7 @@ def generate(env, **kw):
 		env['ARM_CLOCK'] = clock
 		
 		env.Tool('arm')
+		env.Tool('dfu_stm32_programmer')
 		
 		# load openocd tool if required
 		if parser.has_section('program'):
