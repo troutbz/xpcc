@@ -62,7 +62,7 @@ namespace xpcc
          * One thread is used for sending packages to the server
          * And one thread for receiving data from each component
 	     *
-	     *  \author Thorsten Lajewski
+	     *  \author Thorsten Lajewski <thorsten.lajewski@rwth-aachen.de>
 	     */
 		class Client
 		{
@@ -72,7 +72,7 @@ namespace xpcc
 
 			//~Client();
 
-			int getServerPort();
+			int getServerPort() const;
 
 			void connect();
 
@@ -87,7 +87,7 @@ namespace xpcc
 			bool isMessageAvailable() const;
 
 			//get a pointer to the last message in the receivedMessages list
-			boost::shared_ptr<xpcc::tcpip::Message> getMessage();
+			boost::shared_ptr<xpcc::tcpip::Message> getMessage() const;
 
 			//place new message in the received messages list
 			void receiveNewMessage(boost::shared_ptr<xpcc::tcpip::Message> message);

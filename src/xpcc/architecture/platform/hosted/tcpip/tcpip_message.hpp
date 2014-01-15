@@ -52,10 +52,10 @@ namespace xpcc
 			};
 
 			//create REGISTER_MESSAGE
-			TCPHeader(uint8_t sender);
+			TCPHeader(const uint8_t sender);
 
 			//create Data Message
-			TCPHeader(xpcc::Header& header, int dataSize);
+			TCPHeader(const xpcc::Header& header, int dataSize);
 
 			bool isDataMessage() const;
 
@@ -89,12 +89,12 @@ namespace xpcc
 			static constexpr int SSIZE = TCPHeader::HSIZE + Message::MSIZE;
 
 			//this constructor generates a data message
-			Message(xpcc::Header& , SmartPointer payload);
+			Message(const xpcc::Header& header, const SmartPointer payload);
 
 			//copy constructor
 			Message(const Message& msg);
 
-			Message(uint8_t identifier);
+			Message(const uint8_t identifier);
 
 			void encodeMessage();
 

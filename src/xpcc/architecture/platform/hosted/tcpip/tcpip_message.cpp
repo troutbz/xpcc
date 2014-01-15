@@ -1,13 +1,13 @@
 #include "tcpip_message.hpp"
 
-xpcc::tcpip::TCPHeader::TCPHeader(uint8_t sender):
+xpcc::tcpip::TCPHeader::TCPHeader(const uint8_t sender):
 		type(Type::REGISTER), header(), dataLength(0)
 {
 	this->header.source = sender;
 
 }
 
-xpcc::tcpip::TCPHeader::TCPHeader(xpcc::Header& header, int dataSize):
+xpcc::tcpip::TCPHeader::TCPHeader(const xpcc::Header& header, const int dataSize):
 		type(Type::DATA), header(header), dataLength(dataSize)
 {
 
@@ -43,14 +43,14 @@ xpcc::tcpip::Message::getTCPHeader()
 	return this->header;
 }
 
-xpcc::tcpip::Message::Message(xpcc::Header& header, SmartPointer payload):
+xpcc::tcpip::Message::Message(const xpcc::Header& header, const SmartPointer payload):
 		header(header, static_cast<int>(payload.getSize())), data(payload)
 {
 
 }
 
 
-xpcc::tcpip::Message::Message(uint8_t identifier):
+xpcc::tcpip::Message::Message(const uint8_t identifier):
 		header(identifier), data()
 {
 }

@@ -31,7 +31,7 @@ xpcc::tcpip::Client::Client(std::string ip, int port):
 }
 
 int
-xpcc::tcpip::Client::getServerPort()
+xpcc::tcpip::Client::getServerPort() const
 {
 	return this->serverPort;
 }
@@ -128,11 +128,16 @@ xpcc::tcpip::Client::isMessageAvailable() const
 }
 
 boost::shared_ptr<xpcc::tcpip::Message>
-xpcc::tcpip::Client::getMessage()
+xpcc::tcpip::Client::getMessage() const
 {
 	boost::shared_ptr<xpcc::tcpip::Message> msg = this->receivedMessages.front();
-	this->receivedMessages.pop_front();
 	return msg;
+}
+
+void
+xpcc::tcpip::Client::deleteMessage()
+{
+	this->receivedMessages.pop_front();
 }
 
 
