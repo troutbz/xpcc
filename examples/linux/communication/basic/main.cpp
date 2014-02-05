@@ -1,5 +1,4 @@
-
-#include <xpcc/architecture.hpp>
+#include <xpcc/architecture/driver/delay.hpp>
 
 #include <xpcc/communication.hpp>
 #include <xpcc/communication/xpcc/backend/tipc/tipc.hpp>
