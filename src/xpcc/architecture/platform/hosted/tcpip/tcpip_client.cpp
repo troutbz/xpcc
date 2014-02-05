@@ -4,6 +4,8 @@
 #include <sstream>
 #include <string>
 
+#include <boost/thread/locks.hpp>
+
 xpcc::tcpip::Client::Client(std::string ip, int port):
 	connected(false),
 	writingMessages(false),
@@ -118,18 +120,21 @@ xpcc::tcpip::Client::writeHandler(const boost::system::error_code& error)
 void
 xpcc::tcpip::Client::receiveNewMessage(boost::shared_ptr<xpcc::tcpip::Message> message)
 {
+	boost::lock_guard<boost::mutex> lock(this->receiveMessagesMutex);
 	this->receivedMessages.push_back(message);
 }
 
 bool
 xpcc::tcpip::Client::isMessageAvailable() const
 {
+	boost::lock_guard<boost::mutex> lock(this->receiveMessagesMutex);
 	return !this->receivedMessages.empty();
 }
 
 boost::shared_ptr<xpcc::tcpip::Message>
 xpcc::tcpip::Client::getMessage() const
 {
+	boost::lock_guard<boost::mutex> lock(this->receiveMessagesMutex);
 	boost::shared_ptr<xpcc::tcpip::Message> msg = this->receivedMessages.front();
 	return msg;
 }
@@ -137,6 +142,7 @@ xpcc::tcpip::Client::getMessage() const
 void
 xpcc::tcpip::Client::deleteMessage()
 {
+	boost::lock_guard<boost::mutex> lock(receiveMessagesMutex);
 	this->receivedMessages.pop_front();
 }
 

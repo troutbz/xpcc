@@ -150,6 +150,7 @@ namespace xpcc
 
 			//list for available messages
 			std::list< boost::shared_ptr<xpcc::tcpip::Message> > receivedMessages;
+			mutable boost::mutex receiveMessagesMutex;
 
 		};
 	}
