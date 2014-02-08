@@ -9,6 +9,22 @@ env.Append(CPPPATH = ['.'])
 # find all source files
 files = env.FindFiles('.')
 
+# default target is 'tipc'
+target = ARGUMENTS.get('target', 'tipc')
+if target == 'tipc':
+	print "Compiling for tipc"
+	print files
+	sources_filtered = [f for f in files.sources if not f.name.startswith('main_tcpip') ]
+	files.sources = sources_filtered
+	print files
+elif target == 'tcpip':
+	print "Compile for tcpip"
+	sources_filtered = [f for f in files.sources if not f.name.startswith('main_tipc') ]
+	files.sources = sources_filtered
+else:
+	print "Error: unknown target '%s'" % target
+	Exit(1)
+
 # build the xpcc library
 env.XpccLibrary()
 
