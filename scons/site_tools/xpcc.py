@@ -131,6 +131,8 @@ def xpcc_library(env, buildpath=None):
 	
 	define_list = ["#define %s %s" % (key.upper(), value) \
 				for key, value in env['XPCC_LIBRARY_DEFINES'].iteritems()]
+	define_list += ["#define %s %s" % (key.upper(), value) \
+				for key, value in env['XPCC_CONFIG']['defines'].iteritems()]
 	define_list.sort()
 	
 	substitutions = {
@@ -139,7 +141,7 @@ def xpcc_library(env, buildpath=None):
 	}
 
 	file = env.Template(
-			target = os.path.join(env['XPCC_BUILDPATH'], 'xpcc_config.hpp'),
+			target = os.path.join(env['XPCC_ROOTPATH'], 'src', 'xpcc_config.hpp'),
 			source = os.path.join(env['XPCC_ROOTPATH'], 
 								  'templates/xpcc_config.hpp.in'),
 			substitutions = substitutions)

@@ -12,3 +12,5 @@ build/
 /src/xpcc/architecture/generated*
 # platform.hpp is generate from a template
 /src/xpcc/architecture/platform.hpp
+# xpcc defines
+/src/xpcc_config.hpp
