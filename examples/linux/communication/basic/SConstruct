@@ -12,15 +12,11 @@ files = env.FindFiles('.')
 # default target is 'tipc'
 target = ARGUMENTS.get('target', 'tipc')
 if target == 'tipc':
+	env['XPCC_CONFIG']['defines']['USE_TIPC'] = '1'
 	print "Compiling for tipc"
-	print files
-	sources_filtered = [f for f in files.sources if not f.name.startswith('main_tcpip') ]
-	files.sources = sources_filtered
-	print files
 elif target == 'tcpip':
+	env['XPCC_CONFIG']['defines']['USE_TCPIP'] = '1'
 	print "Compile for tcpip"
-	sources_filtered = [f for f in files.sources if not f.name.startswith('main_tipc') ]
-	files.sources = sources_filtered
 else:
 	print "Error: unknown target '%s'" % target
 	Exit(1)

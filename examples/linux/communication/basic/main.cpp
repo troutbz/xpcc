@@ -1,8 +1,18 @@
 #include <xpcc/architecture/driver/delay.hpp>
-#include <xpcc/architecture/platform/hosted/tcpip/tcpip_server.hpp>
 #include <xpcc/communication.hpp>
-#include <xpcc/communication/xpcc/backend/tcpip/tcpip.hpp>
+#include <xpcc_config.hpp>
 
+#ifdef USE_TCPIP
+#include <xpcc/architecture/platform/hosted/tcpip/tcpip_server.hpp>
+#include <xpcc/communication/xpcc/backend/tcpip/tcpip.hpp>
+xpcc::tcpip::Server server(6666);
+xpcc::TcpIpConnector connector("127.0.0.1", 6666);
+#endif
+
+#ifdef USE_TIPC
+#include <xpcc/communication/xpcc/backend/tipc/tipc.hpp>
+xpcc::TipcConnector connector;
+#endif
 
 #include <xpcc/debug/logger.hpp>
 
@@ -15,9 +25,6 @@
 
 #include "communication/postman.hpp"
 #include "communication/identifier.hpp"
-
-    xpcc::tcpip::Server server(6666);
-xpcc::TcpIpConnector connector("127.0.0.1", 6666);
 
 // create an instance of the generated postman
 Postman postman;
