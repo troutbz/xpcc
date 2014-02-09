@@ -142,6 +142,7 @@ namespace xpcc
 			boost::shared_ptr< boost::thread > serviceThread;
 			boost::shared_ptr< boost::thread > sentThread;
 			std::list< boost::shared_ptr<xpcc::tcpip::Message> > messagesToBeSent;
+			mutable boost::mutex sendMessagesMutex;
 
 			//one thread and one receiver for each component of the container
 			std::list< boost::shared_ptr< boost::thread > > receiveThreadPool;

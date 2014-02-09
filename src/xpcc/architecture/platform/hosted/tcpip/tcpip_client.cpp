@@ -81,6 +81,7 @@ xpcc::tcpip::Client::connect_handler(const boost::system::error_code& error)
 void
 xpcc::tcpip::Client::sendPacket(boost::shared_ptr<xpcc::tcpip::Message> msg)
 {
+	boost::lock_guard<boost::mutex> lock(this->sendMessagesMutex);
 	writingMessages = !messagesToBeSent.empty();
 	messagesToBeSent.push_back(msg);
     if (!writingMessages)
@@ -102,6 +103,7 @@ xpcc::tcpip::Client::writeHandler(const boost::system::error_code& error)
     if (!error)
     {
     	//Remove sent message
+    	boost::lock_guard<boost::mutex> lock(this->sendMessagesMutex);
     	messagesToBeSent.pop_front();
     	if (!messagesToBeSent.empty())
     	{

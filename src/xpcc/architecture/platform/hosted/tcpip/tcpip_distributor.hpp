@@ -93,6 +93,7 @@ namespace xpcc
 			boost::asio::ip::tcp::resolver::iterator endpointIter;
 			boost::shared_ptr<boost::asio::ip::tcp::socket> sendSocket;
 			std::list< boost::shared_ptr<xpcc::tcpip::Message> > messagesToBeSent;
+	    	boost::mutex sendMutex;
 
 		};
 	}
