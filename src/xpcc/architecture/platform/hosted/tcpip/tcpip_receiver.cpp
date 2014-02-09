@@ -67,6 +67,7 @@ xpcc::tcpip::Receiver::acceptHandler(
     if (!error)
     {
     	//this->readHeader();
+		boost::lock_guard<boost::mutex> lock(this->connectedMutex);
     	this->connected = true;
     }
     // TODO error handling
@@ -75,8 +76,13 @@ xpcc::tcpip::Receiver::acceptHandler(
 void
 xpcc::tcpip::Receiver::run()
 {
+	bool connection = false;
+	{
+		boost::lock_guard<boost::mutex> lock(this->connectedMutex);
+		connection=this->connected;
+	}
 
-	while(!connected)
+	while(!connection)
 	{
 		boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
 	}

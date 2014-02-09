@@ -33,6 +33,7 @@
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
+#include <boost/thread/mutex.hpp>
 
 #include <list>
 
@@ -94,6 +95,8 @@ namespace tcpip{
 		std::list<boost::shared_ptr<xpcc::tcpip::Message> > receivedMessages;
 
 		bool connected;
+		boost::mutex connectedMutex;
+
     	bool shutdown;
 
     };
