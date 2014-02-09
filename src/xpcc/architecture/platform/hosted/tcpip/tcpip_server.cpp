@@ -43,6 +43,7 @@ xpcc::tcpip::Server::spawnSendThread(uint8_t componentId, std::string ip)
 {
 	boost::shared_ptr<xpcc::tcpip::Distributor> sender(
 			new xpcc::tcpip::Distributor(this, ip, componentId));
+	boost::lock_guard<boost::mutex> lock(distributorMutex);
 	this->distributorMap.emplace(componentId, sender);
 }
 
@@ -70,6 +71,7 @@ xpcc::tcpip::Server::distributeDataMessage(xpcc::tcpip::Message msg)
 		//handle action
 
 		//check if destination is a registered component, else drop message
+		boost::lock_guard<boost::mutex> lock(distributorMutex);
 		if(this->distributorMap.find(destination)!= this->distributorMap.end())
 		{
 			this->distributorMap[destination]->sendMessage(boost::shared_ptr<xpcc::tcpip::Message>(
@@ -87,6 +89,7 @@ xpcc::tcpip::Server::distributeDataMessage(xpcc::tcpip::Message msg)
 	{
 		//handle event
 		//send message to all registered components
+		boost::lock_guard<boost::mutex> lock(distributorMutex);
 		for (auto& pair : this->distributorMap)
 		{
 			pair.second->sendMessage(boost::shared_ptr<xpcc::tcpip::Message>(

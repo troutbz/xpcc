@@ -99,7 +99,7 @@ namespace xpcc
 
 
 			std::map<uint8_t, boost::shared_ptr<xpcc::tcpip::Distributor> > distributorMap;
-
+			boost::mutex distributorMutex;
 		};
 	}
 }
